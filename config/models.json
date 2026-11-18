@@ -1,0 +1,16 @@
+{
+  "routing_strategy": "cost_optimized_with_fallback",
+  "description": "Routes first to a lightweight, fast, cost-effective model, and falls back to a high-capacity model on validation failure or low confidence.",
+  "primary_model": {
+    "id": "openai/gpt-oss-20b",
+    "name": "GPT-OSS 20B (Fast & Cheap)",
+    "temperature": 0.1,
+    "response_format": { "type": "json_object" }
+  },
+  "fallback_model": {
+    "id": "openai/gpt-oss-120b",
+    "name": "GPT-OSS 120B (High-capacity reasoning for multilingual Gujarati/Hindi nuances)",
+    "temperature": 0.1,
+    "response_format": { "type": "json_object" }
+  }
+}
