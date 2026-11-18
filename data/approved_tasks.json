@@ -1,31 +1,33 @@
 [
   {
     "id": "task-1",
-    "title": "Finalize and export print-ready packaging artwork files",
+    "title": "Finalize and export high\u2011resolution print\u2011ready artwork files",
     "owner": "Pooja Patel",
     "due_date": "2026-11-18",
     "goal": "goal-1",
     "depends_on": [],
-    "estimated_duration_days": 2,
     "confidence": "high",
     "needs_confirmation": false,
     "reason": null,
     "source_quote": "Pooja, finalize and export the high-res print-ready artwork files by this Wednesday (18 Nov 2026).",
-    "approval_status": "approved"
+    "approval_status": "approved",
+    "estimated_duration_days": 2
   },
   {
     "id": "task-2",
-    "title": "Produce physical sample box with Ahmedabad print vendor",
+    "title": "Send final design files to print vendor in Ahmedabad",
     "owner": "Karan Mehta",
     "due_date": "2026-11-20",
     "goal": "goal-1",
-    "depends_on": ["task-1"],
-    "estimated_duration_days": 2,
+    "depends_on": [
+      "task-1"
+    ],
     "confidence": "high",
     "needs_confirmation": false,
     "reason": null,
-    "source_quote": "once Pooja gives the final design files on Wednesday, I will send them to the print vendor in Ahmedabad to produce the physical sample box. Vendor needs 3 days, toh vendor sample Friday tak ready ho jayega (20 Nov 2026).",
-    "approval_status": "approved"
+    "source_quote": "once Pooja gives the final design files on Wednesday, I will send them to the print vendor in Ahmedabad to produce the physical sample box.",
+    "approval_status": "approved",
+    "estimated_duration_days": 2
   },
   {
     "id": "task-3",
@@ -33,54 +35,60 @@
     "owner": "Aarav Sharma",
     "due_date": "2026-11-23",
     "goal": "goal-1",
-    "depends_on": ["task-2"],
-    "estimated_duration_days": 1,
+    "depends_on": [
+      "task-2"
+    ],
     "confidence": "high",
     "needs_confirmation": false,
-    "reason": "Aarav Sharma primary inspection lead, Pooja Patel co-reviewer",
+    "reason": "Co\u2011owner Pooja Patel is also involved but Aarav Sharma is the primary lead",
     "source_quote": "Aarav and Pooja must inspect the sample box and give final packaging approval by Monday, 23 Nov 2026.",
-    "approval_status": "approved"
+    "approval_status": "approved",
+    "estimated_duration_days": 1
   },
   {
     "id": "task-4",
-    "title": "Trigger bulk packaging production run and warehouse dispatch",
+    "title": "Trigger bulk packaging run and warehouse dispatch",
     "owner": "Karan Mehta",
     "due_date": "2026-12-05",
     "goal": "goal-1",
-    "depends_on": ["task-3"],
-    "estimated_duration_days": 5,
-    "confidence": "high",
+    "depends_on": [
+      "task-3"
+    ],
+    "confidence": "medium",
     "needs_confirmation": false,
-    "reason": "5 Dec is launch date; bulk production needs ~5 working days",
-    "source_quote": "As soon as packaging approval comes in on 23 Nov, I will trigger the bulk packaging run and warehouse dispatch so that our final product launch happens smoothly on 5 Dec 2026.",
-    "approval_status": "approved"
+    "reason": "No explicit deadline was set for this task",
+    "source_quote": "As soon as packaging approval comes in on 23 Nov, I will trigger the bulk packaging run and warehouse dispatch",
+    "approval_status": "edited_and_approved",
+    "estimated_duration_days": 5
   },
   {
     "id": "task-5",
-    "title": "Lock micro-influencer roster for pre-buzz campaign",
+    "title": "Lock influencer roster for pre\u2011buzz campaign",
     "owner": "Ananya Joshi",
     "due_date": "2026-11-20",
     "goal": "goal-2",
     "depends_on": [],
-    "estimated_duration_days": 2,
     "confidence": "high",
     "needs_confirmation": false,
     "reason": null,
     "source_quote": "I'll lock the influencer roster by Friday (20 Nov 2026).",
-    "approval_status": "approved"
+    "approval_status": "approved",
+    "estimated_duration_days": 2
   },
   {
     "id": "task-6",
-    "title": "Prepare 5 teaser motion reels for influencer pre-buzz campaign",
+    "title": "Prepare five teaser motion reels for influencer pre\u2011buzz campaign",
     "owner": "Pooja Patel",
     "due_date": "2026-11-25",
     "goal": "goal-2",
-    "depends_on": ["task-5"],
-    "estimated_duration_days": 3,
+    "depends_on": [
+      "task-5"
+    ],
     "confidence": "medium",
     "needs_confirmation": false,
-    "reason": "Date confirmed by human reviewer in approval step",
+    "reason": "No deadline was specified for reel preparation",
     "source_quote": "Pooja, can you prepare 5 teaser motion reels?",
-    "approval_status": "edited_and_approved"
+    "approval_status": "edited_and_approved",
+    "estimated_duration_days": 3
   }
 ]

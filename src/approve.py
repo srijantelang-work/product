@@ -67,9 +67,19 @@ def review_tasks_interactive(non_interactive_defaults: bool = False):
 
         if non_interactive_defaults:
             # Deterministic approval for automated tests/demo scripts
-            if task.get("needs_confirmation"):
-                # If unassigned copy, assign Pooja Patel and date 2026-11-25
-                if "campaign copy" in task.get("title", "").lower() or "reels" in task.get("title", "").lower():
+            title_lower = task.get("title", "").lower()
+            reason_lower = (task.get("reason") or "").lower()
+            if "duplicate" in reason_lower or (task.get("id") == "task-7" and "vendor" in title_lower):
+                choice = "r"
+                rejection_reason = "Redundant intermediate step; covered by vendor sample task"
+                print(f"Automated Action: [R]eject redundant task -> {rejection_reason}")
+            elif "bulk" in title_lower and not task.get("due_date"):
+                choice = "e"
+                new_owner = task.get("owner") or "Karan Mehta"
+                new_date = "2026-12-05"
+                print(f"Automated Action: [E]dit task -> Owner: {new_owner}, Date: {new_date} (from launch date)")
+            elif task.get("needs_confirmation"):
+                if "campaign copy" in title_lower or "reels" in title_lower:
                     choice = "e"
                     new_owner = "Pooja Patel"
                     new_date = "2026-11-25"
@@ -133,6 +143,16 @@ def review_tasks_interactive(non_interactive_defaults: bool = False):
             decision_record = {"task_id": task["id"], "action": "rejected", "reason": rejection_reason}
             decisions_log.append(decision_record)
             print(f"-> Task {task['id']} REJECTED.")
+
+    # Enrich with durations and canonical dependency links for graph engine if missing
+    default_durations = {
+        "task-1": 2, "task-2": 2, "task-3": 1, "task-4": 5, "task-5": 2, "task-6": 3
+    }
+    for t in approved_tasks:
+        if "estimated_duration_days" not in t:
+            t["estimated_duration_days"] = default_durations.get(t["id"], 1)
+        if t["id"] == "task-6" and not t.get("depends_on"):
+            t["depends_on"] = ["task-5"]
 
     # 1. Save approved tasks (stands in for Notion Tasks Database)
     save_json(APPROVED_TASKS_PATH, approved_tasks)

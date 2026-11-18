@@ -275,8 +275,8 @@
     "outcome": "success",
     "human_decision": {
       "total_reviewed": 7,
-      "total_approved": 7,
-      "total_rejected": 0,
+      "total_approved": 6,
+      "total_rejected": 1,
       "decisions": [
         {
           "task_id": "task-1",
@@ -295,8 +295,13 @@
         },
         {
           "task_id": "task-4",
-          "action": "approved",
-          "modifications": null
+          "action": "edited",
+          "modifications": {
+            "due_date": {
+              "from": "",
+              "to": "2026-12-05"
+            }
+          }
         },
         {
           "task_id": "task-5",
@@ -315,8 +320,8 @@
         },
         {
           "task_id": "task-7",
-          "action": "approved",
-          "modifications": null
+          "action": "rejected",
+          "reason": "Excluded by reviewer"
         }
       ]
     },
