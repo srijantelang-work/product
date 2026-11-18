@@ -18,7 +18,8 @@ response = client.chat.completions.create(
             "content": "Hello world",
         }
     ],
-    model="llama-3.3-70b-versatile",
+    model="openai/gpt-oss-120b",
 )
 
 print(response.choices[0].message.content)
+
