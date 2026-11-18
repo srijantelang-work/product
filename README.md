@@ -184,3 +184,4 @@ When recording the 5-minute video walkthrough, follow this structured story:
 4. **Human Review & Honest Disclosure (2:45 - 3:30):** Show `src/approve.py`. Transparently state: *"For the downstream demo, I hand-curated `approved_tasks.json` because human review is an intentional requirement, as evidenced by our 5-run stability benchmark."*
 5. **DAG Cascade & Slack Separation (3:30 - 4:45):** Run `src/test_scenarios.py`. Walk through Scenario A showing broken, at-risk, and safe downstream tasks and IST Slack alert queuing.
 6. **Wrap-up & Production Roadmap (4:45 - 5:00):** Summarize v2 integration path (Notion webhooks, Slack Bolt SDK).
+

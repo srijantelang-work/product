@@ -146,3 +146,4 @@ Assumptions for a growing 20-person startup:
 3. **Automated Duration Inference:** Train a fine-tuned LoRA or leverage historical Jira/Linear completion metrics to predict realistic task durations and confidence intervals automatically.
 4. **Calendar & Holiday Awareness:** Integrate Google Calendar API to automatically account for regional holidays (e.g., Diwali week in Ahmedabad), weekends, and PTO schedules during cascade propagation.
 5. **Multi-Meeting Graph Merging:** Automatically link dependencies across different weekly syncs and workstreams into a unified organizational master graph.
+
