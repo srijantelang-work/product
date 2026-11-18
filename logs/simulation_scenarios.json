@@ -2,7 +2,7 @@
   "scenario_a_1day_slip": {
     "root_cause_task": {
       "id": "task-1",
-      "title": "Finalize and export print-ready packaging artwork files",
+      "title": "Finalize and export high\u2011resolution print\u2011ready artwork files",
       "owner": "Pooja Patel",
       "slip_days": 1,
       "committed_date": "2026-11-18",
@@ -11,18 +11,18 @@
     "downstream_impacts": [
       {
         "id": "task-2",
-        "title": "Produce physical sample box with Ahmedabad print vendor",
+        "title": "Send final design files to print vendor in Ahmedabad",
         "owner": "Karan Mehta",
         "committed_date": "2026-11-20",
         "projected_finish": "2026-11-21",
         "estimated_duration_days": 2,
         "status": "broken",
         "buffer_remaining": -1,
-        "reason": "Cascade impact: will finish 1 day(s) late on 2026-11-21 (committed: 2026-11-20). Upstream 'Finalize and export print-ready packaging artwork files' now finishes 2026-11-19, plus 2d of work pushes past deadline."
+        "reason": "Cascade impact: will finish 1 day(s) late on 2026-11-21 (committed: 2026-11-20). Upstream 'Finalize and export high\u2011resolution print\u2011ready artwork files' now finishes 2026-11-19, plus 2d of work pushes past deadline."
       },
       {
         "id": "task-6",
-        "title": "Prepare 5 teaser motion reels for influencer pre-buzz campaign",
+        "title": "Prepare five teaser motion reels for influencer pre\u2011buzz campaign",
         "owner": "Pooja Patel",
         "committed_date": "2026-11-25",
         "projected_finish": "2026-11-25",
@@ -40,11 +40,11 @@
         "estimated_duration_days": 1,
         "status": "at_risk",
         "buffer_remaining": 1,
-        "reason": "Buffer eroded: only 1 day(s) of slack remaining (threshold: \u2264 1d). Upstream 'Produce physical sample box with Ahmedabad print vendor' finishes 2026-11-21, plus 1d of work leaves tight margin."
+        "reason": "Buffer eroded: only 1 day(s) of slack remaining (threshold: \u2264 1d). Upstream 'Send final design files to print vendor in Ahmedabad' finishes 2026-11-21, plus 1d of work leaves tight margin."
       },
       {
         "id": "task-4",
-        "title": "Trigger bulk packaging production run and warehouse dispatch",
+        "title": "Trigger bulk packaging run and warehouse dispatch",
         "owner": "Karan Mehta",
         "committed_date": "2026-12-05",
         "projected_finish": "2026-12-05",
@@ -61,7 +61,7 @@
         "weight": 3,
         "projected_completion": "2026-12-05",
         "status": "at_risk",
-        "consequence_reason": "Schedule compressed: 'Finalize and export print-ready packaging artwork files' finishes 1 day(s) late. Launch date 2026-12-05 still achievable but downstream slack is consumed."
+        "consequence_reason": "Schedule compressed: 'Finalize and export high\u2011resolution print\u2011ready artwork files' finishes 1 day(s) late. Launch date 2026-12-05 still achievable but downstream slack is consumed."
       },
       "goal-2": {
         "name": "Social Media Influencer Pre-buzz Campaign",
@@ -77,26 +77,26 @@
         "recipient_owner": "Pooja Patel",
         "type": "root_confirmation",
         "delivery_status": "\ud83d\udfe2 [DISPATCHED IMMEDIATELY]",
-        "slack_message_text": "\ud83d\udfe2 [DISPATCHED IMMEDIATELY]\n\u26a0\ufe0f *Schedule Update Confirmation Needed: Pooja Patel*\n\u2022 *Task:* `Finalize and export print-ready packaging artwork files`\n\u2022 *Status:* Proposed slip of *1 day(s)* (committed: 2026-11-18 \u2794 new: 2026-11-19).\n\u2022 *Action Required:* Please confirm or adjust this date in Notion to lock the new milestone.\n"
+        "slack_message_text": "\ud83d\udfe2 [DISPATCHED IMMEDIATELY]\n\u26a0\ufe0f *Schedule Update Confirmation Needed: Pooja Patel*\n\u2022 *Task:* `Finalize and export high\u2011resolution print\u2011ready artwork files`\n\u2022 *Status:* Proposed slip of *1 day(s)* (committed: 2026-11-18 \u2794 new: 2026-11-19).\n\u2022 *Action Required:* Please confirm or adjust this date in Notion to lock the new milestone.\n"
       },
       {
         "recipient_owner": "Karan Mehta",
         "type": "downstream_cascade_alert",
         "delivery_status": "\ud83d\udfe2 [DISPATCHED IMMEDIATELY]",
-        "slack_message_text": "\ud83d\udfe2 [DISPATCHED IMMEDIATELY]\n\ud83d\udea8 *Upstream Delay Alert: Impact on Karan Mehta's Deliverables*\n\u2022 *Root Cause:* `Finalize and export print-ready packaging artwork files` (Pooja Patel) slipped by *1 day(s)* (projected finish: 2026-11-19).\n\u2022 *Your Impacted Tasks:*\n\u2022 `Produce physical sample box with Ahmedabad print vendor`: Cascade impact: will finish 1 day(s) late on 2026-11-21 (committed: 2026-11-20). Upstream 'Finalize and export print-ready packaging artwork files' now finishes 2026-11-19, plus 2d of work pushes past deadline.\n\u2022 *Company Goals Impacted:*\n\u2022 *Diwali Artisan Chai Gift Box Launch* (Status: AT_RISK): Schedule compressed: 'Finalize and export print-ready packaging artwork files' finishes 1 day(s) late. Launch date 2026-12-05 still achievable but downstream slack is consumed.\n\u2022 *Suggested Action:* Expedite vendor turnaround, compress review cycle, or request milestone re-alignment in Notion.\n"
+        "slack_message_text": "\ud83d\udfe2 [DISPATCHED IMMEDIATELY]\n\ud83d\udea8 *Upstream Delay Alert: Impact on Karan Mehta's Deliverables*\n\u2022 *Root Cause:* `Finalize and export high\u2011resolution print\u2011ready artwork files` (Pooja Patel) slipped by *1 day(s)* (projected finish: 2026-11-19).\n\u2022 *Your Impacted Tasks:*\n\u2022 `Send final design files to print vendor in Ahmedabad`: Cascade impact: will finish 1 day(s) late on 2026-11-21 (committed: 2026-11-20). Upstream 'Finalize and export high\u2011resolution print\u2011ready artwork files' now finishes 2026-11-19, plus 2d of work pushes past deadline.\n\u2022 *Company Goals Impacted:*\n\u2022 *Diwali Artisan Chai Gift Box Launch* (Status: AT_RISK): Schedule compressed: 'Finalize and export high\u2011resolution print\u2011ready artwork files' finishes 1 day(s) late. Launch date 2026-12-05 still achievable but downstream slack is consumed.\n\u2022 *Suggested Action:* Expedite vendor turnaround, compress review cycle, or request milestone re-alignment in Notion.\n"
       },
       {
         "recipient_owner": "Aarav Sharma",
         "type": "downstream_cascade_alert",
         "delivery_status": "\ud83d\udfe2 [DISPATCHED IMMEDIATELY]",
-        "slack_message_text": "\ud83d\udfe2 [DISPATCHED IMMEDIATELY]\n\ud83d\udea8 *Upstream Delay Alert: Impact on Aarav Sharma's Deliverables*\n\u2022 *Root Cause:* `Finalize and export print-ready packaging artwork files` (Pooja Patel) slipped by *1 day(s)* (projected finish: 2026-11-19).\n\u2022 *Your Impacted Tasks:*\n\u2022 `Inspect sample box and give final packaging approval`: Buffer eroded: only 1 day(s) of slack remaining (threshold: \u2264 1d). Upstream 'Produce physical sample box with Ahmedabad print vendor' finishes 2026-11-21, plus 1d of work leaves tight margin.\n\u2022 *Company Goals Impacted:*\n\u2022 *Diwali Artisan Chai Gift Box Launch* (Status: AT_RISK): Schedule compressed: 'Finalize and export print-ready packaging artwork files' finishes 1 day(s) late. Launch date 2026-12-05 still achievable but downstream slack is consumed.\n\u2022 *Suggested Action:* Monitor closely; schedule buffer has eroded below safety margins.\n"
+        "slack_message_text": "\ud83d\udfe2 [DISPATCHED IMMEDIATELY]\n\ud83d\udea8 *Upstream Delay Alert: Impact on Aarav Sharma's Deliverables*\n\u2022 *Root Cause:* `Finalize and export high\u2011resolution print\u2011ready artwork files` (Pooja Patel) slipped by *1 day(s)* (projected finish: 2026-11-19).\n\u2022 *Your Impacted Tasks:*\n\u2022 `Inspect sample box and give final packaging approval`: Buffer eroded: only 1 day(s) of slack remaining (threshold: \u2264 1d). Upstream 'Send final design files to print vendor in Ahmedabad' finishes 2026-11-21, plus 1d of work leaves tight margin.\n\u2022 *Company Goals Impacted:*\n\u2022 *Diwali Artisan Chai Gift Box Launch* (Status: AT_RISK): Schedule compressed: 'Finalize and export high\u2011resolution print\u2011ready artwork files' finishes 1 day(s) late. Launch date 2026-12-05 still achievable but downstream slack is consumed.\n\u2022 *Suggested Action:* Monitor closely; schedule buffer has eroded below safety margins.\n"
       }
     ]
   },
   "scenario_b_4day_slip": {
     "root_cause_task": {
       "id": "task-1",
-      "title": "Finalize and export print-ready packaging artwork files",
+      "title": "Finalize and export high\u2011resolution print\u2011ready artwork files",
       "owner": "Pooja Patel",
       "slip_days": 4,
       "committed_date": "2026-11-18",
@@ -105,18 +105,18 @@
     "downstream_impacts": [
       {
         "id": "task-2",
-        "title": "Produce physical sample box with Ahmedabad print vendor",
+        "title": "Send final design files to print vendor in Ahmedabad",
         "owner": "Karan Mehta",
         "committed_date": "2026-11-20",
         "projected_finish": "2026-11-24",
         "estimated_duration_days": 2,
         "status": "broken",
         "buffer_remaining": -4,
-        "reason": "Cascade impact: will finish 4 day(s) late on 2026-11-24 (committed: 2026-11-20). Upstream 'Finalize and export print-ready packaging artwork files' now finishes 2026-11-22, plus 2d of work pushes past deadline."
+        "reason": "Cascade impact: will finish 4 day(s) late on 2026-11-24 (committed: 2026-11-20). Upstream 'Finalize and export high\u2011resolution print\u2011ready artwork files' now finishes 2026-11-22, plus 2d of work pushes past deadline."
       },
       {
         "id": "task-6",
-        "title": "Prepare 5 teaser motion reels for influencer pre-buzz campaign",
+        "title": "Prepare five teaser motion reels for influencer pre\u2011buzz campaign",
         "owner": "Pooja Patel",
         "committed_date": "2026-11-25",
         "projected_finish": "2026-11-25",
@@ -134,11 +134,11 @@
         "estimated_duration_days": 1,
         "status": "broken",
         "buffer_remaining": -2,
-        "reason": "Cascade impact: will finish 2 day(s) late on 2026-11-25 (committed: 2026-11-23). Upstream 'Produce physical sample box with Ahmedabad print vendor' now finishes 2026-11-24, plus 1d of work pushes past deadline."
+        "reason": "Cascade impact: will finish 2 day(s) late on 2026-11-25 (committed: 2026-11-23). Upstream 'Send final design files to print vendor in Ahmedabad' now finishes 2026-11-24, plus 1d of work pushes past deadline."
       },
       {
         "id": "task-4",
-        "title": "Trigger bulk packaging production run and warehouse dispatch",
+        "title": "Trigger bulk packaging run and warehouse dispatch",
         "owner": "Karan Mehta",
         "committed_date": "2026-12-05",
         "projected_finish": "2026-12-05",
@@ -155,7 +155,7 @@
         "weight": 3,
         "projected_completion": "2026-12-05",
         "status": "at_risk",
-        "consequence_reason": "Schedule compressed: 'Finalize and export print-ready packaging artwork files' finishes 4 day(s) late. Launch date 2026-12-05 still achievable but downstream slack is consumed."
+        "consequence_reason": "Schedule compressed: 'Finalize and export high\u2011resolution print\u2011ready artwork files' finishes 4 day(s) late. Launch date 2026-12-05 still achievable but downstream slack is consumed."
       },
       "goal-2": {
         "name": "Social Media Influencer Pre-buzz Campaign",
@@ -171,19 +171,19 @@
         "recipient_owner": "Pooja Patel",
         "type": "root_confirmation",
         "delivery_status": "\u23f0 [QUEUED UNTIL NEXT ALERT WINDOW]",
-        "slack_message_text": "\u23f0 [QUEUED UNTIL NEXT ALERT WINDOW]\n\u26a0\ufe0f *Schedule Update Confirmation Needed: Pooja Patel*\n\u2022 *Task:* `Finalize and export print-ready packaging artwork files`\n\u2022 *Status:* Proposed slip of *4 day(s)* (committed: 2026-11-18 \u2794 new: 2026-11-22).\n\u2022 *Action Required:* Please confirm or adjust this date in Notion to lock the new milestone.\n\n_Note: Outside alert hours (Mon-Sat 9am-7pm IST). Message queued until Thursday, 19 Nov 2026, 09:00 AM IST._"
+        "slack_message_text": "\u23f0 [QUEUED UNTIL NEXT ALERT WINDOW]\n\u26a0\ufe0f *Schedule Update Confirmation Needed: Pooja Patel*\n\u2022 *Task:* `Finalize and export high\u2011resolution print\u2011ready artwork files`\n\u2022 *Status:* Proposed slip of *4 day(s)* (committed: 2026-11-18 \u2794 new: 2026-11-22).\n\u2022 *Action Required:* Please confirm or adjust this date in Notion to lock the new milestone.\n\n_Note: Outside alert hours (Mon-Sat 9am-7pm IST). Message queued until Thursday, 19 Nov 2026, 09:00 AM IST._"
       },
       {
         "recipient_owner": "Karan Mehta",
         "type": "downstream_cascade_alert",
         "delivery_status": "\u23f0 [QUEUED UNTIL NEXT ALERT WINDOW]",
-        "slack_message_text": "\u23f0 [QUEUED UNTIL NEXT ALERT WINDOW]\n\ud83d\udea8 *Upstream Delay Alert: Impact on Karan Mehta's Deliverables*\n\u2022 *Root Cause:* `Finalize and export print-ready packaging artwork files` (Pooja Patel) slipped by *4 day(s)* (projected finish: 2026-11-22).\n\u2022 *Your Impacted Tasks:*\n\u2022 `Produce physical sample box with Ahmedabad print vendor`: Cascade impact: will finish 4 day(s) late on 2026-11-24 (committed: 2026-11-20). Upstream 'Finalize and export print-ready packaging artwork files' now finishes 2026-11-22, plus 2d of work pushes past deadline.\n\u2022 *Company Goals Impacted:*\n\u2022 *Diwali Artisan Chai Gift Box Launch* (Status: AT_RISK): Schedule compressed: 'Finalize and export print-ready packaging artwork files' finishes 4 day(s) late. Launch date 2026-12-05 still achievable but downstream slack is consumed.\n\u2022 *Suggested Action:* Expedite vendor turnaround, compress review cycle, or request milestone re-alignment in Notion.\n\n_Note: Outside alert hours (Mon-Sat 9am-7pm IST). Message queued until Thursday, 19 Nov 2026, 09:00 AM IST._"
+        "slack_message_text": "\u23f0 [QUEUED UNTIL NEXT ALERT WINDOW]\n\ud83d\udea8 *Upstream Delay Alert: Impact on Karan Mehta's Deliverables*\n\u2022 *Root Cause:* `Finalize and export high\u2011resolution print\u2011ready artwork files` (Pooja Patel) slipped by *4 day(s)* (projected finish: 2026-11-22).\n\u2022 *Your Impacted Tasks:*\n\u2022 `Send final design files to print vendor in Ahmedabad`: Cascade impact: will finish 4 day(s) late on 2026-11-24 (committed: 2026-11-20). Upstream 'Finalize and export high\u2011resolution print\u2011ready artwork files' now finishes 2026-11-22, plus 2d of work pushes past deadline.\n\u2022 *Company Goals Impacted:*\n\u2022 *Diwali Artisan Chai Gift Box Launch* (Status: AT_RISK): Schedule compressed: 'Finalize and export high\u2011resolution print\u2011ready artwork files' finishes 4 day(s) late. Launch date 2026-12-05 still achievable but downstream slack is consumed.\n\u2022 *Suggested Action:* Expedite vendor turnaround, compress review cycle, or request milestone re-alignment in Notion.\n\n_Note: Outside alert hours (Mon-Sat 9am-7pm IST). Message queued until Thursday, 19 Nov 2026, 09:00 AM IST._"
       },
       {
         "recipient_owner": "Aarav Sharma",
         "type": "downstream_cascade_alert",
         "delivery_status": "\u23f0 [QUEUED UNTIL NEXT ALERT WINDOW]",
-        "slack_message_text": "\u23f0 [QUEUED UNTIL NEXT ALERT WINDOW]\n\ud83d\udea8 *Upstream Delay Alert: Impact on Aarav Sharma's Deliverables*\n\u2022 *Root Cause:* `Finalize and export print-ready packaging artwork files` (Pooja Patel) slipped by *4 day(s)* (projected finish: 2026-11-22).\n\u2022 *Your Impacted Tasks:*\n\u2022 `Inspect sample box and give final packaging approval`: Cascade impact: will finish 2 day(s) late on 2026-11-25 (committed: 2026-11-23). Upstream 'Produce physical sample box with Ahmedabad print vendor' now finishes 2026-11-24, plus 1d of work pushes past deadline.\n\u2022 *Company Goals Impacted:*\n\u2022 *Diwali Artisan Chai Gift Box Launch* (Status: AT_RISK): Schedule compressed: 'Finalize and export print-ready packaging artwork files' finishes 4 day(s) late. Launch date 2026-12-05 still achievable but downstream slack is consumed.\n\u2022 *Suggested Action:* Expedite vendor turnaround, compress review cycle, or request milestone re-alignment in Notion.\n\n_Note: Outside alert hours (Mon-Sat 9am-7pm IST). Message queued until Thursday, 19 Nov 2026, 09:00 AM IST._"
+        "slack_message_text": "\u23f0 [QUEUED UNTIL NEXT ALERT WINDOW]\n\ud83d\udea8 *Upstream Delay Alert: Impact on Aarav Sharma's Deliverables*\n\u2022 *Root Cause:* `Finalize and export high\u2011resolution print\u2011ready artwork files` (Pooja Patel) slipped by *4 day(s)* (projected finish: 2026-11-22).\n\u2022 *Your Impacted Tasks:*\n\u2022 `Inspect sample box and give final packaging approval`: Cascade impact: will finish 2 day(s) late on 2026-11-25 (committed: 2026-11-23). Upstream 'Send final design files to print vendor in Ahmedabad' now finishes 2026-11-24, plus 1d of work pushes past deadline.\n\u2022 *Company Goals Impacted:*\n\u2022 *Diwali Artisan Chai Gift Box Launch* (Status: AT_RISK): Schedule compressed: 'Finalize and export high\u2011resolution print\u2011ready artwork files' finishes 4 day(s) late. Launch date 2026-12-05 still achievable but downstream slack is consumed.\n\u2022 *Suggested Action:* Expedite vendor turnaround, compress review cycle, or request milestone re-alignment in Notion.\n\n_Note: Outside alert hours (Mon-Sat 9am-7pm IST). Message queued until Thursday, 19 Nov 2026, 09:00 AM IST._"
       }
     ]
   },
@@ -199,7 +199,7 @@
     "downstream_impacts": [
       {
         "id": "task-2",
-        "title": "Produce physical sample box with Ahmedabad print vendor",
+        "title": "Send final design files to print vendor in Ahmedabad",
         "owner": "Karan Mehta",
         "committed_date": "2026-11-20",
         "projected_finish": "2026-11-20",
@@ -210,7 +210,7 @@
       },
       {
         "id": "task-6",
-        "title": "Prepare 5 teaser motion reels for influencer pre-buzz campaign",
+        "title": "Prepare five teaser motion reels for influencer pre\u2011buzz campaign",
         "owner": "Pooja Patel",
         "committed_date": "2026-11-25",
         "projected_finish": "2026-11-25",
@@ -221,7 +221,7 @@
       },
       {
         "id": "task-4",
-        "title": "Trigger bulk packaging production run and warehouse dispatch",
+        "title": "Trigger bulk packaging run and warehouse dispatch",
         "owner": "Karan Mehta",
         "committed_date": "2026-12-05",
         "projected_finish": "2026-12-05",
@@ -261,7 +261,7 @@
   "scenario_d_leaf_slip": {
     "root_cause_task": {
       "id": "task-4",
-      "title": "Trigger bulk packaging production run and warehouse dispatch",
+      "title": "Trigger bulk packaging run and warehouse dispatch",
       "owner": "Karan Mehta",
       "slip_days": 2,
       "committed_date": "2026-12-05",
@@ -270,7 +270,7 @@
     "downstream_impacts": [
       {
         "id": "task-2",
-        "title": "Produce physical sample box with Ahmedabad print vendor",
+        "title": "Send final design files to print vendor in Ahmedabad",
         "owner": "Karan Mehta",
         "committed_date": "2026-11-20",
         "projected_finish": "2026-11-20",
@@ -281,7 +281,7 @@
       },
       {
         "id": "task-6",
-        "title": "Prepare 5 teaser motion reels for influencer pre-buzz campaign",
+        "title": "Prepare five teaser motion reels for influencer pre\u2011buzz campaign",
         "owner": "Pooja Patel",
         "committed_date": "2026-11-25",
         "projected_finish": "2026-11-25",
@@ -309,7 +309,7 @@
         "weight": 3,
         "projected_completion": "2026-12-07",
         "status": "off_track",
-        "consequence_reason": "Launch will miss target 2026-12-05 by 2 day(s). Critical path: 'Trigger bulk packaging production run and warehouse dispatch' now finishes 2026-12-07."
+        "consequence_reason": "Launch will miss target 2026-12-05 by 2 day(s). Critical path: 'Trigger bulk packaging run and warehouse dispatch' now finishes 2026-12-07."
       },
       "goal-2": {
         "name": "Social Media Influencer Pre-buzz Campaign",
@@ -325,7 +325,7 @@
         "recipient_owner": "Karan Mehta",
         "type": "root_confirmation",
         "delivery_status": "\ud83d\udfe2 [DISPATCHED IMMEDIATELY]",
-        "slack_message_text": "\ud83d\udfe2 [DISPATCHED IMMEDIATELY]\n\u26a0\ufe0f *Schedule Update Confirmation Needed: Karan Mehta*\n\u2022 *Task:* `Trigger bulk packaging production run and warehouse dispatch`\n\u2022 *Status:* Proposed slip of *2 day(s)* (committed: 2026-12-05 \u2794 new: 2026-12-07).\n\u2022 *Action Required:* Please confirm or adjust this date in Notion to lock the new milestone.\n"
+        "slack_message_text": "\ud83d\udfe2 [DISPATCHED IMMEDIATELY]\n\u26a0\ufe0f *Schedule Update Confirmation Needed: Karan Mehta*\n\u2022 *Task:* `Trigger bulk packaging run and warehouse dispatch`\n\u2022 *Status:* Proposed slip of *2 day(s)* (committed: 2026-12-05 \u2794 new: 2026-12-07).\n\u2022 *Action Required:* Please confirm or adjust this date in Notion to lock the new milestone.\n"
       }
     ]
   }
