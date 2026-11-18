@@ -182,3 +182,4 @@ def print_accuracy_report(approved_tasks: List[Dict[str, Any]], proposed_tasks: 
 if __name__ == "__main__":
     non_interactive = "--auto" in sys.argv
     review_tasks_interactive(non_interactive_defaults=non_interactive)
+

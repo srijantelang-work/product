@@ -143,3 +143,4 @@ def validate_extraction(
 
     is_valid = len(errors) == 0
     return ValidationResult(is_valid=is_valid, errors=errors, warnings=warnings)
+

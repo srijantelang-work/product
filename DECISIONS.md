@@ -39,3 +39,4 @@
 - **Validation**: Pydantic v2 schemas for all task models, dependencies, and approval states.
 - **Graph Engine**: In-memory DAG representation for topological sorting and critical path slip calculation.
 - **Configuration**: Declarative settings in `config/` (prompt templates, JSON schema, model configs).
+

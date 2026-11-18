@@ -25,3 +25,4 @@ Ananya said: "Accha, we should also onboard 10 micro-influencers. I'll lock the 
 Karan asked about shipping boxes: "Shipping corrugated boxes order karva padshe, someone look into bulk carton rates."
 
 Meeting ended with Vikram reminding everyone to keep deadlines tight.
+

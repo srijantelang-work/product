@@ -21,3 +21,4 @@ class MeetingExtractionOutput(BaseModel):
     meeting_date: str = Field(description="Date of the meeting in ISO format YYYY-MM-DD")
     tasks: List[TaskItem] = Field(default_factory=list, description="List of proposed tasks extracted from the meeting")
     ignored_remarks: List[IgnoredRemark] = Field(default_factory=list, description="List of remarks explicitly ignored as chatter")
+

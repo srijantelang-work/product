@@ -61,3 +61,4 @@
 ## 4. Non-Task Remarks (Must NOT Be Extracted As Tasks)
 - *"The vendor seemed really nice when we met them over tea last week."* (Social conversational filler / impression).
 - *"Design finalization toh ho gaya."* (Status statement).
+
