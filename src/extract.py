@@ -18,6 +18,23 @@ load_dotenv()
 
 RUN_LOG_PATH = "logs/run_log.json"
 
+# Pricing per million tokens (Groq On-Demand estimates)
+MODEL_PRICING = {
+    "openai/gpt-oss-20b": {
+        "prompt_per_1m": 0.075,
+        "completion_per_1m": 0.10,
+    },
+    "openai/gpt-oss-120b": {
+        "prompt_per_1m": 0.50,
+        "completion_per_1m": 0.80,
+    }
+}
+
+def calculate_cost(model_id: str, prompt_tokens: int, completion_tokens: int) -> float:
+    pricing = MODEL_PRICING.get(model_id, {"prompt_per_1m": 0.10, "completion_per_1m": 0.15})
+    cost = (prompt_tokens / 1_000_000 * pricing["prompt_per_1m"]) + (completion_tokens / 1_000_000 * pricing["completion_per_1m"])
+    return round(cost, 6)
+
 def log_run_telemetry(record: Dict[str, Any]):
     os.makedirs("logs", exist_ok=True)
     logs = []
@@ -52,26 +69,47 @@ def call_groq_api(
         kwargs["reasoning_effort"] = model_cfg["reasoning_effort"]
 
     start_time = time.time()
-    try:
-        response = client.chat.completions.create(**kwargs)
-        duration_sec = round(time.time() - start_time, 3)
-        choice = response.choices[0]
-        content = choice.message.content or ""
-        finish_reason = choice.finish_reason
-        
-        usage = response.usage
-        telemetry = {
-            "duration_sec": duration_sec,
-            "finish_reason": finish_reason,
-            "prompt_tokens": usage.prompt_tokens if usage else 0,
-            "completion_tokens": usage.completion_tokens if usage else 0,
-            "total_tokens": usage.total_tokens if usage else 0,
-            "reasoning_tokens": getattr(usage.completion_tokens_details, "reasoning_tokens", 0) if usage and usage.completion_tokens_details else 0,
-        }
-        return True, content, finish_reason, telemetry
-    except Exception as e:
-        duration_sec = round(time.time() - start_time, 3)
-        return False, None, "api_error", {"duration_sec": duration_sec, "error": str(e)}
+    
+    # Retry with exponential backoff on 429/rate-limit
+    max_retries = 3
+    base_backoff = 2
+    for attempt in range(max_retries):
+        try:
+            response = client.chat.completions.create(**kwargs)
+            duration_sec = round(time.time() - start_time, 3)
+            choice = response.choices[0]
+            content = choice.message.content or ""
+            finish_reason = choice.finish_reason
+            
+            usage = response.usage
+            prompt_tokens = usage.prompt_tokens if usage else 0
+            completion_tokens = usage.completion_tokens if usage else 0
+            total_tokens = usage.total_tokens if usage else 0
+            reasoning_tokens = getattr(usage.completion_tokens_details, "reasoning_tokens", 0) if usage and usage.completion_tokens_details else 0
+            
+            cost_usd = calculate_cost(model_id, prompt_tokens, completion_tokens)
+
+            telemetry = {
+                "duration_sec": duration_sec,
+                "finish_reason": finish_reason,
+                "prompt_tokens": prompt_tokens,
+                "completion_tokens": completion_tokens,
+                "total_tokens": total_tokens,
+                "reasoning_tokens": reasoning_tokens,
+                "cost_usd": cost_usd,
+            }
+            return True, content, finish_reason, telemetry
+        except Exception as e:
+            err_str = str(e)
+            if "rate_limit_exceeded" in err_str or "429" in err_str:
+                wait_time = base_backoff ** (attempt + 1)
+                logger.warning(f"Rate limit hit. Backing off {wait_time}s before retry...")
+                time.sleep(wait_time)
+                continue
+            duration_sec = round(time.time() - start_time, 3)
+            return False, None, "api_error", {"duration_sec": duration_sec, "error": err_str}
+            
+    return False, None, "rate_limit_exhausted", {"error": "Rate limit retries exhausted"}
 
 def run_extraction_workflow():
     api_key = os.getenv("GROQ_API_KEY")
@@ -79,7 +117,6 @@ def run_extraction_workflow():
         raise ValueError("GROQ_API_KEY is not set.")
     client = Groq(api_key=api_key)
 
-    # 1. Load context and configs
     with open("config/models.json") as f: models_cfg = json.load(f)
     with open("config/prompt_v1.txt") as f: prompt_template = f.read()
     with open("config/schema.json") as f: schema_json = f.read()
@@ -128,25 +165,24 @@ def run_extraction_workflow():
             "retry_reason": None,
         }
 
-        # Failure Condition A: Length truncation
+        # 1. Length budget handling: increase budget before escalating
         if finish_reason == "length":
             logger.warning("Attempt hit token budget limit (finish_reason=length).")
             attempt_record["status"] = "failed"
             attempt_record["retry_reason"] = "length_budget_exceeded"
             run_log_entry["attempts"].append(attempt_record)
             
-            # Retry with larger budget if primary, else escalate
             if not escalated_to_fallback and max_tokens < 8192:
                 max_tokens = 8192
                 logger.info(f"Expanding token budget to {max_tokens} and retrying primary model.")
             else:
-                logger.info("Escalating to fallback model 120B due to repeated token budget exhaustion.")
+                logger.info("Escalating to fallback model 120B.")
                 current_model = fallback_cfg
                 escalated_to_fallback = True
                 max_tokens = fallback_cfg.get("max_completion_tokens", 4096)
             continue
 
-        # Failure Condition B: API error or empty content
+        # 2. General API error
         if not success or not content:
             attempt_record["status"] = "failed"
             attempt_record["retry_reason"] = f"api_error: {telemetry.get('error')}"
@@ -156,7 +192,7 @@ def run_extraction_workflow():
             escalated_to_fallback = True
             continue
 
-        # Parse JSON and validate Pydantic schema
+        # 3. Pydantic validation
         try:
             parsed_json = json.loads(content)
             validated_pydantic = MeetingExtractionOutput.model_validate(parsed_json)
@@ -165,12 +201,11 @@ def run_extraction_workflow():
             attempt_record["retry_reason"] = f"schema_validation_error: {str(e)}"
             run_log_entry["attempts"].append(attempt_record)
             logger.warning(f"Schema validation failed: {e}. Retrying with feedback.")
-            # Inject error feedback into conversation history
             messages.append({"role": "assistant", "content": content})
-            messages.append({"role": "user", "content": f"Your output violated the schema: {str(e)}. Please correct and re-emit strict JSON."})
+            messages.append({"role": "user", "content": f"Output violated schema: {str(e)}. Correct and emit strict JSON."})
             continue
 
-        # Run Business Rule Validation
+        # 4. Business rule validation
         val_result = validate_extraction(
             extraction_data=parsed_json,
             raw_meeting_notes=raw_note,
@@ -193,7 +228,6 @@ def run_extraction_workflow():
             run_log_entry["attempts"].append(attempt_record)
             logger.warning(f"Business rules violated: {error_msgs}. Retrying with feedback.")
             
-            # Feed validation errors back to model
             feedback = f"Your task extraction has business rule errors: {error_msgs}. Please fix these and return corrected JSON adhering to the schema."
             messages.append({"role": "assistant", "content": content})
             messages.append({"role": "user", "content": feedback})
@@ -204,6 +238,7 @@ def run_extraction_workflow():
         run_log_entry["attempts"].append(attempt_record)
         run_log_entry["final_status"] = "success"
         run_log_entry["selected_model"] = current_model["id"]
+        run_log_entry["total_run_cost_usd"] = sum(a["telemetry"].get("cost_usd", 0) for a in run_log_entry["attempts"])
         final_output = validated_pydantic
         break
 
@@ -216,6 +251,7 @@ def run_extraction_workflow():
         print("\n=== PIPELINE SUCCESSFUL ===")
         print(f"Model used: {run_log_entry['selected_model']}")
         print(f"Attempts: {len(run_log_entry['attempts'])}")
+        print(f"Estimated Cost: ${run_log_entry.get('total_run_cost_usd', 0):.6f}")
         print(f"Tasks extracted: {len(final_output.tasks)}")
         print(f"Ignored remarks: {len(final_output.ignored_remarks)}")
     else:

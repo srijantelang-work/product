@@ -3,7 +3,7 @@
   "tasks": [
     {
       "id": "task-1",
-      "title": "Finalize and export high‑res print‑ready artwork files",
+      "title": "Export high‑resolution print‑ready artwork files",
       "owner": "Pooja Patel",
       "due_date": "2026-11-18",
       "goal": "goal-1",
@@ -17,7 +17,7 @@
       "id": "task-2",
       "title": "Send final design files to print vendor in Ahmedabad",
       "owner": "Karan Mehta",
-      "due_date": "2026-11-20",
+      "due_date": "2026-11-18",
       "goal": "goal-1",
       "depends_on": [
         "task-1"
@@ -29,9 +29,9 @@
     },
     {
       "id": "task-3",
-      "title": "Inspect sample box and give final packaging approval",
-      "owner": "Aarav Sharma",
-      "due_date": "2026-11-23",
+      "title": "Receive vendor sample box",
+      "owner": "Karan Mehta",
+      "due_date": "2026-11-20",
       "goal": "goal-1",
       "depends_on": [
         "task-2"
@@ -39,16 +39,16 @@
       "confidence": "high",
       "needs_confirmation": false,
       "reason": null,
-      "source_quote": "Aarav and Pooja must inspect the sample box and give final packaging approval by Monday, 23 Nov 2026."
+      "source_quote": "Vendor needs 3 days, toh vendor sample Friday tak ready ho jayega (20 Nov 2026)."
     },
     {
       "id": "task-4",
       "title": "Inspect sample box and give final packaging approval",
-      "owner": "Pooja Patel",
+      "owner": "Aarav Sharma",
       "due_date": "2026-11-23",
       "goal": "goal-1",
       "depends_on": [
-        "task-2"
+        "task-3"
       ],
       "confidence": "high",
       "needs_confirmation": false,
@@ -59,43 +59,18 @@
       "id": "task-5",
       "title": "Trigger bulk packaging run and warehouse dispatch",
       "owner": "Karan Mehta",
-      "due_date": "2026-12-05",
+      "due_date": "2026-11-23",
       "goal": "goal-1",
       "depends_on": [
-        "task-3",
         "task-4"
       ],
       "confidence": "high",
       "needs_confirmation": false,
       "reason": null,
-      "source_quote": "As soon as packaging approval comes in on 23 Nov, I will trigger the bulk packaging run and warehouse dispatch so that our final product launch happens smoothly on 5 Dec 2026."
+      "source_quote": "As soon as packaging approval comes in on 23 Nov, I will trigger the bulk packaging run and warehouse dispatch."
     },
     {
       "id": "task-6",
-      "title": "Prepare 5 teaser motion reels for influencer pre‑buzz campaign",
-      "owner": "Ananya Joshi",
-      "due_date": "2026-11-28",
-      "goal": "goal-2",
-      "depends_on": [],
-      "confidence": "high",
-      "needs_confirmation": false,
-      "reason": null,
-      "source_quote": "Pooja, can you prepare 5 teaser motion reels?"
-    },
-    {
-      "id": "task-7",
-      "title": "Write campaign copy for influencer pre‑buzz campaign",
-      "owner": "Pooja Patel",
-      "due_date": null,
-      "goal": "goal-2",
-      "depends_on": [],
-      "confidence": "medium",
-      "needs_confirmation": true,
-      "reason": "\"Someone should write the campaign copy next week\" – date is ambiguous",
-      "source_quote": "Someone should write the campaign copy next week."
-    },
-    {
-      "id": "task-8",
       "title": "Lock influencer roster for pre‑buzz campaign",
       "owner": "Ananya Joshi",
       "due_date": "2026-11-20",
@@ -107,50 +82,34 @@
       "source_quote": "I'll lock the influencer roster by Friday (20 Nov 2026)."
     },
     {
-      "id": "task-9",
-      "title": "Look into bulk carton rates for shipping corrugated boxes",
-      "owner": "Karan Mehta",
-      "due_date": null,
-      "goal": null,
+      "id": "task-7",
+      "title": "Prepare 5 teaser motion reels for influencer pre‑buzz campaign",
+      "owner": "Pooja Patel",
+      "due_date": "2026-11-28",
+      "goal": "goal-2",
       "depends_on": [],
-      "confidence": "medium",
-      "needs_confirmation": true,
-      "reason": "\"someone look into bulk carton rates\" – owner unspecified",
-      "source_quote": "Shipping corrugated boxes order karva padshe, someone look into bulk carton rates."
-    },
-    {
-      "id": "task-10",
-      "title": "Rethink unboxing card insertion and add QR code for discount",
-      "owner": "Vikram Desai",
-      "due_date": null,
-      "goal": null,
-      "depends_on": [],
-      "confidence": "medium",
-      "needs_confirmation": true,
-      "reason": "Owner is Vikram but action is a suggestion, not a confirmed task",
-      "source_quote": "Also we need to rethink our unboxing card insertion, maybe add a QR code for discount."
+      "confidence": "high",
+      "needs_confirmation": false,
+      "reason": null,
+      "source_quote": "Pooja, can you prepare 5 teaser motion reels?"
     }
   ],
   "ignored_remarks": [
     {
-      "quote": "Listen, influencer pre‑buzz campaign start karvu chhe by 28 Nov 2026.",
-      "reason": "Casual introductory phrase not an actionable task."
-    },
-    {
-      "quote": "Accha, we should also onboard 10 micro‑influencers.",
-      "reason": "Suggestion without a clear owner or deadline."
-    },
-    {
-      "quote": "Mane problem nathi, but I need finalized ad copy.",
-      "reason": "Expresses a need but no assigned owner or due date."
-    },
-    {
-      "quote": "Barabar chhe. The vendor seemed really nice when we met them over tea last week.",
+      "quote": "The vendor seemed really nice when we met them over tea last week.",
       "reason": "Opinion about vendor, not a task."
     },
     {
-      "quote": "Meeting ended with Vikram reminding everyone to keep deadlines tight.",
-      "reason": "General reminder, not a specific action item."
+      "quote": "Also we need to rethink our unboxing card insertion, maybe add a QR code for discount.",
+      "reason": "Brainstorming, no commitment."
+    },
+    {
+      "quote": "Someone should write the campaign copy next week.",
+      "reason": "Exploratory idea, no assignment."
+    },
+    {
+      "quote": "Shipping corrugated boxes order karva padshe, someone look into bulk carton rates.",
+      "reason": "Uncommitted suggestion, no owner or deadline."
     }
   ]
 }

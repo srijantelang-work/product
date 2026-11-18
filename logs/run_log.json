@@ -34,5 +34,48 @@
     ],
     "final_status": "success",
     "selected_model": "openai/gpt-oss-20b"
+  },
+  {
+    "timestamp": "2026-11-18T22:02:30.177776Z",
+    "meeting_date": "2026-11-16",
+    "attempts": [
+      {
+        "attempt": 1,
+        "model": "openai/gpt-oss-20b",
+        "finish_reason": "stop",
+        "telemetry": {
+          "duration_sec": 1.5,
+          "finish_reason": "stop",
+          "prompt_tokens": 2627,
+          "completion_tokens": 904,
+          "total_tokens": 3531,
+          "reasoning_tokens": 164,
+          "cost_usd": 0.000287
+        },
+        "status": "success",
+        "retry_reason": null,
+        "business_rule_validation": {
+          "is_valid": true,
+          "error_count": 0,
+          "errors": [],
+          "warning_count": 2,
+          "warnings": [
+            {
+              "rule": "source_quote_verbatim",
+              "message": "Task task-1 source quote could not be matched verbatim in meeting note.",
+              "task_id": "task-1"
+            },
+            {
+              "rule": "source_quote_verbatim",
+              "message": "Task task-5 source quote could not be matched verbatim in meeting note.",
+              "task_id": "task-5"
+            }
+          ]
+        }
+      }
+    ],
+    "final_status": "success",
+    "selected_model": "openai/gpt-oss-20b",
+    "total_run_cost_usd": 0.000287
   }
 ]
