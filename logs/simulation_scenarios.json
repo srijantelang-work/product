@@ -1,0 +1,253 @@
+{
+  "scenario_1_large_slip": {
+    "root_cause_task": {
+      "id": "task-1",
+      "title": "Finalize and export print-ready packaging artwork files",
+      "owner": "Pooja Patel",
+      "slip_days": 4,
+      "committed_date": "2026-11-18",
+      "projected_finish": "2026-11-22"
+    },
+    "downstream_impacts": [
+      {
+        "id": "task-2",
+        "title": "Produce physical sample box with Ahmedabad print vendor",
+        "owner": "Karan Mehta",
+        "committed_date": "2026-11-20",
+        "projected_finish": "2026-11-24",
+        "status": "broken",
+        "buffer_remaining": -2,
+        "reason": "Cascade bottleneck: finishes 4 day(s) late on 2026-11-24 (committed: 2026-11-20) due to upstream slip on 'Finalize and export print-ready packaging artwork files'."
+      },
+      {
+        "id": "task-3",
+        "title": "Inspect sample box and give final packaging approval",
+        "owner": "Aarav Sharma",
+        "committed_date": "2026-11-23",
+        "projected_finish": "2026-11-27",
+        "status": "broken",
+        "buffer_remaining": -1,
+        "reason": "Cascade bottleneck: finishes 4 day(s) late on 2026-11-27 (committed: 2026-11-23) due to upstream slip on 'Produce physical sample box with Ahmedabad print vendor'."
+      },
+      {
+        "id": "task-4",
+        "title": "Trigger bulk packaging production run and warehouse dispatch",
+        "owner": "Karan Mehta",
+        "committed_date": "2026-12-05",
+        "projected_finish": "2026-12-09",
+        "status": "broken",
+        "buffer_remaining": 8,
+        "reason": "Cascade bottleneck: finishes 4 day(s) late on 2026-12-09 (committed: 2026-12-05) due to upstream slip on 'Inspect sample box and give final packaging approval'."
+      }
+    ],
+    "goal_rollups": {
+      "goal-1": {
+        "name": "Diwali Artisan Chai Gift Box Launch",
+        "target_date": "2026-12-05",
+        "weight": 3,
+        "projected_completion": "2026-12-09",
+        "status": "off_track",
+        "consequence_reason": "Launch will miss target 2026-12-05 by 4 day(s) because 'Finalize and export print-ready packaging artwork files' is delayed."
+      },
+      "goal-2": {
+        "name": "Social Media Influencer Pre-buzz Campaign",
+        "target_date": "2026-11-28",
+        "weight": 2,
+        "projected_completion": "2026-11-25",
+        "status": "on_track",
+        "consequence_reason": "All milestone deliverables on schedule with healthy buffers."
+      }
+    },
+    "slack_alerts": [
+      {
+        "recipient_owner": "Pooja Patel",
+        "type": "root_confirmation",
+        "delivery_status": "\u23f0 [QUEUED UNTIL NEXT ALERT WINDOW]",
+        "slack_message_text": "\u23f0 [QUEUED UNTIL NEXT ALERT WINDOW]\n\u26a0\ufe0f *Schedule Update Confirmation Needed: Pooja Patel*\n\u2022 *Task:* `Finalize and export print-ready packaging artwork files`\n\u2022 *Status:* Proposed slip of *4 day(s)* (committed: 2026-11-18 \u2794 new: 2026-11-22).\n\u2022 *Action Required:* Please confirm or adjust this date in Notion to lock the new milestone.\n\n_Note: Outside alert hours (Mon-Sat 9am-7pm IST). Message queued until Thursday, 19 Nov 2026, 09:00 AM IST._"
+      },
+      {
+        "recipient_owner": "Karan Mehta",
+        "type": "downstream_cascade_alert",
+        "delivery_status": "\u23f0 [QUEUED UNTIL NEXT ALERT WINDOW]",
+        "slack_message_text": "\u23f0 [QUEUED UNTIL NEXT ALERT WINDOW]\n\ud83d\udea8 *Upstream Delay Alert: Impact on Karan Mehta's Deliverables*\n\u2022 *Root Cause:* `Finalize and export print-ready packaging artwork files` (Pooja Patel) slipped by *4 day(s)* (projected finish: 2026-11-22).\n\u2022 *Your Impacted Tasks:*\n\u2022 `Produce physical sample box with Ahmedabad print vendor`: Cascade bottleneck: finishes 4 day(s) late on 2026-11-24 (committed: 2026-11-20) due to upstream slip on 'Finalize and export print-ready packaging artwork files'.\n\u2022 `Trigger bulk packaging production run and warehouse dispatch`: Cascade bottleneck: finishes 4 day(s) late on 2026-12-09 (committed: 2026-12-05) due to upstream slip on 'Inspect sample box and give final packaging approval'.\n\u2022 *Company Goals Impacted:*\n\u2022 *Diwali Artisan Chai Gift Box Launch* (Status: OFF_TRACK): Launch will miss target 2026-12-05 by 4 day(s) because 'Finalize and export print-ready packaging artwork files' is delayed.\n\u2022 *Suggested Action:* Expedite vendor turnaround, compress review cycle, or request milestone re-alignment in Notion.\n\n_Note: Outside alert hours (Mon-Sat 9am-7pm IST). Message queued until Thursday, 19 Nov 2026, 09:00 AM IST._"
+      },
+      {
+        "recipient_owner": "Aarav Sharma",
+        "type": "downstream_cascade_alert",
+        "delivery_status": "\u23f0 [QUEUED UNTIL NEXT ALERT WINDOW]",
+        "slack_message_text": "\u23f0 [QUEUED UNTIL NEXT ALERT WINDOW]\n\ud83d\udea8 *Upstream Delay Alert: Impact on Aarav Sharma's Deliverables*\n\u2022 *Root Cause:* `Finalize and export print-ready packaging artwork files` (Pooja Patel) slipped by *4 day(s)* (projected finish: 2026-11-22).\n\u2022 *Your Impacted Tasks:*\n\u2022 `Inspect sample box and give final packaging approval`: Cascade bottleneck: finishes 4 day(s) late on 2026-11-27 (committed: 2026-11-23) due to upstream slip on 'Produce physical sample box with Ahmedabad print vendor'.\n\u2022 *Company Goals Impacted:*\n\u2022 *Diwali Artisan Chai Gift Box Launch* (Status: OFF_TRACK): Launch will miss target 2026-12-05 by 4 day(s) because 'Finalize and export print-ready packaging artwork files' is delayed.\n\u2022 *Suggested Action:* Expedite vendor turnaround, compress review cycle, or request milestone re-alignment in Notion.\n\n_Note: Outside alert hours (Mon-Sat 9am-7pm IST). Message queued until Thursday, 19 Nov 2026, 09:00 AM IST._"
+      }
+    ]
+  },
+  "scenario_2_at_risk_1day": {
+    "root_cause_task": {
+      "id": "task-1",
+      "title": "Finalize and export print-ready packaging artwork files",
+      "owner": "Pooja Patel",
+      "slip_days": 1,
+      "committed_date": "2026-11-18",
+      "projected_finish": "2026-11-19"
+    },
+    "downstream_impacts": [
+      {
+        "id": "task-2",
+        "title": "Produce physical sample box with Ahmedabad print vendor",
+        "owner": "Karan Mehta",
+        "committed_date": "2026-11-20",
+        "projected_finish": "2026-11-21",
+        "status": "broken",
+        "buffer_remaining": 1,
+        "reason": "Cascade bottleneck: finishes 1 day(s) late on 2026-11-21 (committed: 2026-11-20) due to upstream slip on 'Finalize and export print-ready packaging artwork files'."
+      },
+      {
+        "id": "task-3",
+        "title": "Inspect sample box and give final packaging approval",
+        "owner": "Aarav Sharma",
+        "committed_date": "2026-11-23",
+        "projected_finish": "2026-11-24",
+        "status": "broken",
+        "buffer_remaining": 2,
+        "reason": "Cascade bottleneck: finishes 1 day(s) late on 2026-11-24 (committed: 2026-11-23) due to upstream slip on 'Produce physical sample box with Ahmedabad print vendor'."
+      },
+      {
+        "id": "task-4",
+        "title": "Trigger bulk packaging production run and warehouse dispatch",
+        "owner": "Karan Mehta",
+        "committed_date": "2026-12-05",
+        "projected_finish": "2026-12-06",
+        "status": "broken",
+        "buffer_remaining": 11,
+        "reason": "Cascade bottleneck: finishes 1 day(s) late on 2026-12-06 (committed: 2026-12-05) due to upstream slip on 'Inspect sample box and give final packaging approval'."
+      }
+    ],
+    "goal_rollups": {
+      "goal-1": {
+        "name": "Diwali Artisan Chai Gift Box Launch",
+        "target_date": "2026-12-05",
+        "weight": 3,
+        "projected_completion": "2026-12-06",
+        "status": "off_track",
+        "consequence_reason": "Launch will miss target 2026-12-05 by 1 day(s) because 'Finalize and export print-ready packaging artwork files' is delayed."
+      },
+      "goal-2": {
+        "name": "Social Media Influencer Pre-buzz Campaign",
+        "target_date": "2026-11-28",
+        "weight": 2,
+        "projected_completion": "2026-11-25",
+        "status": "on_track",
+        "consequence_reason": "All milestone deliverables on schedule with healthy buffers."
+      }
+    },
+    "slack_alerts": [
+      {
+        "recipient_owner": "Pooja Patel",
+        "type": "root_confirmation",
+        "delivery_status": "\ud83d\udfe2 [DISPATCHED IMMEDIATELY]",
+        "slack_message_text": "\ud83d\udfe2 [DISPATCHED IMMEDIATELY]\n\u26a0\ufe0f *Schedule Update Confirmation Needed: Pooja Patel*\n\u2022 *Task:* `Finalize and export print-ready packaging artwork files`\n\u2022 *Status:* Proposed slip of *1 day(s)* (committed: 2026-11-18 \u2794 new: 2026-11-19).\n\u2022 *Action Required:* Please confirm or adjust this date in Notion to lock the new milestone.\n"
+      },
+      {
+        "recipient_owner": "Karan Mehta",
+        "type": "downstream_cascade_alert",
+        "delivery_status": "\ud83d\udfe2 [DISPATCHED IMMEDIATELY]",
+        "slack_message_text": "\ud83d\udfe2 [DISPATCHED IMMEDIATELY]\n\ud83d\udea8 *Upstream Delay Alert: Impact on Karan Mehta's Deliverables*\n\u2022 *Root Cause:* `Finalize and export print-ready packaging artwork files` (Pooja Patel) slipped by *1 day(s)* (projected finish: 2026-11-19).\n\u2022 *Your Impacted Tasks:*\n\u2022 `Produce physical sample box with Ahmedabad print vendor`: Cascade bottleneck: finishes 1 day(s) late on 2026-11-21 (committed: 2026-11-20) due to upstream slip on 'Finalize and export print-ready packaging artwork files'.\n\u2022 `Trigger bulk packaging production run and warehouse dispatch`: Cascade bottleneck: finishes 1 day(s) late on 2026-12-06 (committed: 2026-12-05) due to upstream slip on 'Inspect sample box and give final packaging approval'.\n\u2022 *Company Goals Impacted:*\n\u2022 *Diwali Artisan Chai Gift Box Launch* (Status: OFF_TRACK): Launch will miss target 2026-12-05 by 1 day(s) because 'Finalize and export print-ready packaging artwork files' is delayed.\n\u2022 *Suggested Action:* Expedite vendor turnaround, compress review cycle, or request milestone re-alignment in Notion.\n"
+      },
+      {
+        "recipient_owner": "Aarav Sharma",
+        "type": "downstream_cascade_alert",
+        "delivery_status": "\ud83d\udfe2 [DISPATCHED IMMEDIATELY]",
+        "slack_message_text": "\ud83d\udfe2 [DISPATCHED IMMEDIATELY]\n\ud83d\udea8 *Upstream Delay Alert: Impact on Aarav Sharma's Deliverables*\n\u2022 *Root Cause:* `Finalize and export print-ready packaging artwork files` (Pooja Patel) slipped by *1 day(s)* (projected finish: 2026-11-19).\n\u2022 *Your Impacted Tasks:*\n\u2022 `Inspect sample box and give final packaging approval`: Cascade bottleneck: finishes 1 day(s) late on 2026-11-24 (committed: 2026-11-23) due to upstream slip on 'Produce physical sample box with Ahmedabad print vendor'.\n\u2022 *Company Goals Impacted:*\n\u2022 *Diwali Artisan Chai Gift Box Launch* (Status: OFF_TRACK): Launch will miss target 2026-12-05 by 1 day(s) because 'Finalize and export print-ready packaging artwork files' is delayed.\n\u2022 *Suggested Action:* Expedite vendor turnaround, compress review cycle, or request milestone re-alignment in Notion.\n"
+      }
+    ]
+  },
+  "scenario_3_mid_chain": {
+    "root_cause_task": {
+      "id": "task-3",
+      "title": "Inspect sample box and give final packaging approval",
+      "owner": "Aarav Sharma",
+      "slip_days": 3,
+      "committed_date": "2026-11-23",
+      "projected_finish": "2026-11-26"
+    },
+    "downstream_impacts": [
+      {
+        "id": "task-4",
+        "title": "Trigger bulk packaging production run and warehouse dispatch",
+        "owner": "Karan Mehta",
+        "committed_date": "2026-12-05",
+        "projected_finish": "2026-12-08",
+        "status": "broken",
+        "buffer_remaining": 9,
+        "reason": "Cascade bottleneck: finishes 3 day(s) late on 2026-12-08 (committed: 2026-12-05) due to upstream slip on 'Inspect sample box and give final packaging approval'."
+      }
+    ],
+    "goal_rollups": {
+      "goal-1": {
+        "name": "Diwali Artisan Chai Gift Box Launch",
+        "target_date": "2026-12-05",
+        "weight": 3,
+        "projected_completion": "2026-12-08",
+        "status": "off_track",
+        "consequence_reason": "Launch will miss target 2026-12-05 by 3 day(s) because 'Inspect sample box and give final packaging approval' is delayed."
+      },
+      "goal-2": {
+        "name": "Social Media Influencer Pre-buzz Campaign",
+        "target_date": "2026-11-28",
+        "weight": 2,
+        "projected_completion": "2026-11-25",
+        "status": "on_track",
+        "consequence_reason": "All milestone deliverables on schedule with healthy buffers."
+      }
+    },
+    "slack_alerts": [
+      {
+        "recipient_owner": "Aarav Sharma",
+        "type": "root_confirmation",
+        "delivery_status": "\ud83d\udfe2 [DISPATCHED IMMEDIATELY]",
+        "slack_message_text": "\ud83d\udfe2 [DISPATCHED IMMEDIATELY]\n\u26a0\ufe0f *Schedule Update Confirmation Needed: Aarav Sharma*\n\u2022 *Task:* `Inspect sample box and give final packaging approval`\n\u2022 *Status:* Proposed slip of *3 day(s)* (committed: 2026-11-23 \u2794 new: 2026-11-26).\n\u2022 *Action Required:* Please confirm or adjust this date in Notion to lock the new milestone.\n"
+      },
+      {
+        "recipient_owner": "Karan Mehta",
+        "type": "downstream_cascade_alert",
+        "delivery_status": "\ud83d\udfe2 [DISPATCHED IMMEDIATELY]",
+        "slack_message_text": "\ud83d\udfe2 [DISPATCHED IMMEDIATELY]\n\ud83d\udea8 *Upstream Delay Alert: Impact on Karan Mehta's Deliverables*\n\u2022 *Root Cause:* `Inspect sample box and give final packaging approval` (Aarav Sharma) slipped by *3 day(s)* (projected finish: 2026-11-26).\n\u2022 *Your Impacted Tasks:*\n\u2022 `Trigger bulk packaging production run and warehouse dispatch`: Cascade bottleneck: finishes 3 day(s) late on 2026-12-08 (committed: 2026-12-05) due to upstream slip on 'Inspect sample box and give final packaging approval'.\n\u2022 *Company Goals Impacted:*\n\u2022 *Diwali Artisan Chai Gift Box Launch* (Status: OFF_TRACK): Launch will miss target 2026-12-05 by 3 day(s) because 'Inspect sample box and give final packaging approval' is delayed.\n\u2022 *Suggested Action:* Expedite vendor turnaround, compress review cycle, or request milestone re-alignment in Notion.\n"
+      }
+    ]
+  },
+  "scenario_4_leaf_task": {
+    "root_cause_task": {
+      "id": "task-4",
+      "title": "Trigger bulk packaging production run and warehouse dispatch",
+      "owner": "Karan Mehta",
+      "slip_days": 2,
+      "committed_date": "2026-12-05",
+      "projected_finish": "2026-12-07"
+    },
+    "downstream_impacts": [],
+    "goal_rollups": {
+      "goal-1": {
+        "name": "Diwali Artisan Chai Gift Box Launch",
+        "target_date": "2026-12-05",
+        "weight": 3,
+        "projected_completion": "2026-12-07",
+        "status": "off_track",
+        "consequence_reason": "Launch will miss target 2026-12-05 by 2 day(s) because 'Trigger bulk packaging production run and warehouse dispatch' is delayed."
+      },
+      "goal-2": {
+        "name": "Social Media Influencer Pre-buzz Campaign",
+        "target_date": "2026-11-28",
+        "weight": 2,
+        "projected_completion": "2026-11-25",
+        "status": "on_track",
+        "consequence_reason": "All milestone deliverables on schedule with healthy buffers."
+      }
+    },
+    "slack_alerts": [
+      {
+        "recipient_owner": "Karan Mehta",
+        "type": "root_confirmation",
+        "delivery_status": "\ud83d\udfe2 [DISPATCHED IMMEDIATELY]",
+        "slack_message_text": "\ud83d\udfe2 [DISPATCHED IMMEDIATELY]\n\u26a0\ufe0f *Schedule Update Confirmation Needed: Karan Mehta*\n\u2022 *Task:* `Trigger bulk packaging production run and warehouse dispatch`\n\u2022 *Status:* Proposed slip of *2 day(s)* (committed: 2026-12-05 \u2794 new: 2026-12-07).\n\u2022 *Action Required:* Please confirm or adjust this date in Notion to lock the new milestone.\n"
+      }
+    ]
+  }
+}

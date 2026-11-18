@@ -1,14 +1,38 @@
 import json
 import os
 from datetime import datetime, timedelta, time, timezone
-from typing import Dict, List, Any, Optional, Set
+from typing import Dict, List, Any, Optional, Tuple
 
-# Constants & Assumptions
-# IST is UTC+5:30
 IST = timezone(timedelta(hours=5, minutes=30))
 ALERT_START_TIME = time(9, 0)   # 9:00 AM IST
 ALERT_END_TIME = time(19, 0)    # 7:00 PM IST
 BUFFER_THRESHOLD_DAYS = 1       # 1 day buffer or less is considered 'at_risk'
+
+def parse_date(date_str: Optional[str]) -> Optional[datetime]:
+    if not date_str:
+        return None
+    return datetime.strptime(date_str, "%Y-%m-%d")
+
+def format_date(dt: Optional[datetime]) -> str:
+    if not dt:
+        return "TBD"
+    return dt.strftime("%Y-%m-%d")
+
+def is_within_alert_hours(dt: datetime) -> bool:
+    if dt.weekday() == 6:  # Sunday
+        return False
+    local_time = dt.time()
+    return ALERT_START_TIME <= local_time <= ALERT_END_TIME
+
+def get_next_alert_window(dt: datetime) -> datetime:
+    curr = dt
+    if curr.time() > ALERT_END_TIME:
+        curr = (curr + timedelta(days=1)).replace(hour=9, minute=0, second=0, microsecond=0)
+    elif curr.time() < ALERT_START_TIME:
+        curr = curr.replace(hour=9, minute=0, second=0, microsecond=0)
+    if curr.weekday() == 6:  # Sunday
+        curr = (curr + timedelta(days=1)).replace(hour=9, minute=0, second=0, microsecond=0)
+    return curr
 
 class TaskNode:
     def __init__(self, data: Dict[str, Any]):
@@ -16,25 +40,33 @@ class TaskNode:
         self.title = data["title"]
         self.owner = data.get("owner")
         self.goal = data.get("goal")
-        self.original_due_date = data.get("due_date")
-        self.current_due_date = data.get("due_date")
+        self.committed_due_date = data.get("due_date")
+        self.projected_finish_date = data.get("due_date")
         self.depends_on: List[str] = data.get("depends_on", [])
         self.downstream: List[str] = []
         self.status = "safe"  # safe, at_risk, broken
-        self.status_reason: Optional[str] = None
         self.buffer_remaining: Optional[int] = None
-        self.days_slipped: int = 0
+        self.delay_days: int = 0
+        self.diagnostic_reason: Optional[str] = None
 
-class DependencyGraph:
+class CascadeDependencyGraph:
     def __init__(self, tasks: List[Dict[str, Any]]):
         self.nodes: Dict[str, TaskNode] = {t["id"]: TaskNode(t) for t in tasks}
-        self._build_downstream_links()
+        self.planned_durations: Dict[Tuple[str, str], int] = {}
+        self._build_edges_and_durations()
 
-    def _build_downstream_links(self):
+    def _build_edges_and_durations(self):
         for node in self.nodes.values():
             for parent_id in node.depends_on:
                 if parent_id in self.nodes:
                     self.nodes[parent_id].downstream.append(node.id)
+                    parent_due = parse_date(self.nodes[parent_id].committed_due_date)
+                    child_due = parse_date(node.committed_due_date)
+                    if parent_due and child_due and child_due >= parent_due:
+                        gap = (child_due - parent_due).days
+                    else:
+                        gap = 1
+                    self.planned_durations[(parent_id, node.id)] = gap
 
     def topological_order(self) -> List[str]:
         in_degree = {nid: len(n.depends_on) for nid, n in self.nodes.items()}
@@ -49,277 +81,216 @@ class DependencyGraph:
                     queue.append(child_id)
         return order
 
-def parse_date(date_str: Optional[str]) -> Optional[datetime]:
-    if not date_str:
-        return None
-    return datetime.strptime(date_str, "%Y-%m-%d")
+    def simulate_cascade(
+        self,
+        slipped_task_id: str,
+        slip_days: int,
+        simulation_time_ist: datetime
+    ) -> Dict[str, Any]:
+        if slipped_task_id not in self.nodes:
+            raise ValueError(f"Task {slipped_task_id} not found.")
 
-def format_date(dt: Optional[datetime]) -> str:
-    if not dt:
-        return "TBD"
-    return dt.strftime("%Y-%m-%d")
+        for node in self.nodes.values():
+            node.projected_finish_date = node.committed_due_date
+            node.status = "safe"
+            node.buffer_remaining = None
+            node.delay_days = 0
+            node.diagnostic_reason = None
 
-def is_within_alert_hours(dt: datetime) -> bool:
-    """Checks whether the datetime falls between Mon-Sat, 9:00 AM - 7:00 PM IST."""
-    # weekday() returns 0 for Monday and 6 for Sunday
-    if dt.weekday() == 6:  # Sunday
-        return False
-    local_time = dt.time()
-    return ALERT_START_TIME <= local_time <= ALERT_END_TIME
+        root = self.nodes[slipped_task_id]
+        root_committed_dt = parse_date(root.committed_due_date)
+        if not root_committed_dt:
+            raise ValueError(f"Task {slipped_task_id} has no due date.")
 
-def get_next_alert_window(dt: datetime) -> datetime:
-    """Finds the next valid alert window (9:00 AM IST on Mon-Sat)."""
-    curr = dt
-    # If after 7pm, advance to next morning 9am
-    if curr.time() > ALERT_END_TIME:
-        curr = (curr + timedelta(days=1)).replace(hour=9, minute=0, second=0, microsecond=0)
-    # If before 9am, set to today 9am
-    elif curr.time() < ALERT_START_TIME:
-        curr = curr.replace(hour=9, minute=0, second=0, microsecond=0)
-    
-    # If landing on Sunday, advance to Monday 9am
-    if curr.weekday() == 6:
-        curr = (curr + timedelta(days=1)).replace(hour=9, minute=0, second=0, microsecond=0)
-    return curr
+        root.delay_days = slip_days
+        new_root_finish = root_committed_dt + timedelta(days=slip_days)
+        root.projected_finish_date = format_date(new_root_finish)
+        
+        if slip_days > 0:
+            root.status = "broken"
+            root.diagnostic_reason = f"Root cause of delay: slipped by {slip_days} day(s) from committed date {root.committed_due_date} to {root.projected_finish_date}."
 
-def simulate_slip(
-    graph: DependencyGraph,
-    slipped_task_id: str,
-    days_slipped: int,
-    simulation_time_ist: Optional[datetime] = None
-) -> Dict[str, Any]:
-    if slipped_task_id not in graph.nodes:
-        raise ValueError(f"Task '{slipped_task_id}' not found in dependency graph.")
+        topo_order = self.topological_order()
+        start_eval = False
 
-    if simulation_time_ist is None:
-        # Default to current time in IST
-        simulation_time_ist = datetime.now(IST)
-
-    slipped_node = graph.nodes[slipped_task_id]
-    slipped_node.days_slipped = days_slipped
-    
-    orig_dt = parse_date(slipped_node.original_due_date)
-    if not orig_dt:
-        raise ValueError(f"Task '{slipped_task_id}' does not have a set due date.")
-
-    new_due_dt = orig_dt + timedelta(days=days_slipped)
-    slipped_node.current_due_date = format_date(new_due_dt)
-    slipped_node.status = "broken" if days_slipped > 0 else "safe"
-    slipped_node.status_reason = f"Primary source of delay: slipped by {days_slipped} days."
-
-    # Propagate through topological order
-    topo_order = graph.topological_order()
-    start_eval = False
-    affected_tasks: List[TaskNode] = []
-
-    for nid in topo_order:
-        if nid == slipped_task_id:
-            start_eval = True
-            affected_tasks.append(graph.nodes[nid])
-            continue
-        if not start_eval:
-            continue
-
-        node = graph.nodes[nid]
-        node_due_dt = parse_date(node.current_due_date)
-        if not node_due_dt:
-            continue
-
-        # Evaluate against all upstream dependencies
-        worst_status = "safe"
-        worst_reason = None
-        min_buffer = 999
-
-        for parent_id in node.depends_on:
-            parent = graph.nodes[parent_id]
-            parent_due_dt = parse_date(parent.current_due_date)
-            if not parent_due_dt:
+        for nid in topo_order:
+            if nid == slipped_task_id:
+                start_eval = True
+                continue
+            if not start_eval:
                 continue
 
-            buffer_days = (node_due_dt - parent_due_dt).days
-            if buffer_days < min_buffer:
-                min_buffer = buffer_days
+            node = self.nodes[nid]
+            committed_dt = parse_date(node.committed_due_date)
+            if not committed_dt or not node.depends_on:
+                continue
 
-            if parent_due_dt > node_due_dt:
-                days_over = (parent_due_dt - node_due_dt).days
-                status = "broken"
-                reason = f"Upstream task '{parent.title}' finishes on {format_date(parent_due_dt)}, which is {days_over} day(s) AFTER downstream task '{node.title}' is due ({format_date(node_due_dt)})."
-            elif buffer_days <= BUFFER_THRESHOLD_DAYS:
-                status = "at_risk"
-                reason = f"Buffer with upstream task '{parent.title}' is only {buffer_days} day(s) (threshold: <= {BUFFER_THRESHOLD_DAYS} day)."
+            earliest_finish = committed_dt
+            min_buffer = 999
+            controlling_parent = None
+
+            for parent_id in node.depends_on:
+                parent = self.nodes[parent_id]
+                parent_proj_dt = parse_date(parent.projected_finish_date)
+                if not parent_proj_dt:
+                    continue
+                
+                planned_gap = self.planned_durations.get((parent_id, node.id), 1)
+                required_child_finish = parent_proj_dt + timedelta(days=planned_gap)
+                if required_child_finish > earliest_finish:
+                    earliest_finish = required_child_finish
+                    controlling_parent = parent
+
+                buffer_gap = (committed_dt - parent_proj_dt).days
+                if buffer_gap < min_buffer:
+                    min_buffer = buffer_gap
+
+            node.projected_finish_date = format_date(earliest_finish)
+            node.buffer_remaining = min_buffer
+
+            if earliest_finish > committed_dt:
+                days_over = (earliest_finish - committed_dt).days
+                node.delay_days = days_over
+                node.status = "broken"
+                node.diagnostic_reason = (
+                    f"Cascade bottleneck: finishes {days_over} day(s) late on {format_date(earliest_finish)} "
+                    f"(committed: {format_date(committed_dt)}) due to upstream slip on '{controlling_parent.title}'."
+                )
+            elif min_buffer <= BUFFER_THRESHOLD_DAYS:
+                node.status = "at_risk"
+                node.diagnostic_reason = (
+                    f"Timeline at risk: buffer with upstream '{controlling_parent.title}' "
+                    f"eroded to {min_buffer} day(s) (threshold: <= {BUFFER_THRESHOLD_DAYS} day)."
+                )
             else:
-                status = "safe"
-                reason = f"Healthy buffer of {buffer_days} days."
+                node.status = "safe"
+                node.diagnostic_reason = f"Healthy buffer of {min_buffer} day(s)."
 
-            if status == "broken":
-                worst_status = "broken"
-                worst_reason = reason
-                break
-            elif status == "at_risk" and worst_status != "broken":
-                worst_status = "at_risk"
-                worst_reason = reason
+        goal_rollups = self._compute_goal_rollups()
+        alerts = self._build_slack_alerts(root, simulation_time_ist, goal_rollups)
 
-        node.status = worst_status
-        node.status_reason = worst_reason
-        node.buffer_remaining = min_buffer
-        if worst_status in ["broken", "at_risk"]:
-            affected_tasks.append(node)
-
-    # Goal Roll-up Calculation
-    goals = load_goals()
-    goal_rollups = {}
-    for gid, goal in goals.items():
-        goal_tasks = [n for n in graph.nodes.values() if n.goal == gid]
-        if not goal_tasks:
-            continue
-        
-        has_broken = any(t.status == "broken" for t in goal_tasks)
-        has_at_risk = any(t.status == "at_risk" for t in goal_tasks)
-
-        if has_broken:
-            g_status = "off_track"
-            broken_nodes = [t for t in goal_tasks if t.status == "broken"]
-            g_reason = broken_nodes[0].status_reason
-        elif has_at_risk:
-            g_status = "at_risk"
-            at_risk_nodes = [t for t in goal_tasks if t.status == "at_risk"]
-            g_reason = at_risk_nodes[0].status_reason
-        else:
-            g_status = "on_track"
-            g_reason = "All milestone tasks on schedule."
-
-        goal_rollups[gid] = {
-            "name": goal["name"],
-            "target_date": goal["target_date"],
-            "weight": goal["weight"],
-            "status": g_status,
-            "reason": g_reason
+        return {
+            "root_cause_task": {
+                "id": root.id,
+                "title": root.title,
+                "owner": root.owner,
+                "slip_days": slip_days,
+                "committed_date": root.committed_due_date,
+                "projected_finish": root.projected_finish_date,
+            },
+            "downstream_impacts": [
+                {
+                    "id": self.nodes[nid].id,
+                    "title": self.nodes[nid].title,
+                    "owner": self.nodes[nid].owner,
+                    "committed_date": self.nodes[nid].committed_due_date,
+                    "projected_finish": self.nodes[nid].projected_finish_date,
+                    "status": self.nodes[nid].status,
+                    "buffer_remaining": self.nodes[nid].buffer_remaining,
+                    "reason": self.nodes[nid].diagnostic_reason
+                }
+                for nid in topo_order if nid != slipped_task_id and self.nodes[nid].status in ["broken", "at_risk"]
+            ],
+            "goal_rollups": goal_rollups,
+            "slack_alerts": alerts
         }
 
-    # Generate Slack Alert Dispatches
-    slack_alerts = generate_slack_alerts(
-        slipped_node=slipped_node,
-        affected_tasks=affected_tasks,
-        goal_rollups=goal_rollups,
-        sim_time=simulation_time_ist
-    )
+    def _compute_goal_rollups(self) -> Dict[str, Any]:
+        with open("data/goals.json") as f:
+            goals = {g["id"]: g for g in json.load(f)}
 
-    return {
-        "slipped_task": {
-            "id": slipped_node.id,
-            "title": slipped_node.title,
-            "days_slipped": days_slipped,
-            "original_due_date": slipped_node.original_due_date,
-            "new_due_date": slipped_node.current_due_date
-        },
-        "affected_tasks": [
-            {
-                "id": t.id,
-                "title": t.title,
-                "owner": t.owner,
-                "status": t.status,
-                "buffer_remaining": t.buffer_remaining,
-                "reason": t.status_reason
+        rollups = {}
+        for gid, ginfo in goals.items():
+            tasks = [n for n in self.nodes.values() if n.goal == gid]
+            if not tasks:
+                continue
+
+            target_dt = parse_date(ginfo["target_date"])
+            broken_tasks = [t for t in tasks if t.status == "broken"]
+            at_risk_tasks = [t for t in tasks if t.status == "at_risk"]
+
+            latest_task_finish = max([parse_date(t.projected_finish_date) for t in tasks if parse_date(t.projected_finish_date)])
+
+            if broken_tasks or (latest_task_finish and latest_task_finish > target_dt):
+                status = "off_track"
+                slip_delta = (latest_task_finish - target_dt).days if (latest_task_finish and latest_task_finish > target_dt) else broken_tasks[0].delay_days
+                reason = f"Launch will miss target {ginfo['target_date']} by {slip_delta} day(s) because '{broken_tasks[0].title}' is delayed."
+            elif at_risk_tasks:
+                status = "at_risk"
+                reason = f"Milestone tight; '{at_risk_tasks[0].title}' buffer eroded to {at_risk_tasks[0].buffer_remaining} day(s)."
+            else:
+                status = "on_track"
+                reason = "All milestone deliverables on schedule with healthy buffers."
+
+            rollups[gid] = {
+                "name": ginfo["name"],
+                "target_date": ginfo["target_date"],
+                "weight": ginfo["weight"],
+                "projected_completion": format_date(latest_task_finish),
+                "status": status,
+                "consequence_reason": reason
             }
-            for t in affected_tasks
-        ],
-        "goals": goal_rollups,
-        "slack_alerts": slack_alerts
-    }
+        return rollups
 
-def load_goals() -> Dict[str, Dict[str, Any]]:
-    with open("data/goals.json") as f:
-        data = json.load(f)
-    return {g["id"]: g for g in data}
+    def _build_slack_alerts(
+        self,
+        root: TaskNode,
+        sim_time: datetime,
+        goal_rollups: Dict[str, Any]
+    ) -> List[Dict[str, Any]]:
+        alerts = []
+        within_hours = is_within_alert_hours(sim_time)
+        next_window = None if within_hours else get_next_alert_window(sim_time).strftime("%A, %d %b %Y, 09:00 AM IST")
+        header = "🟢 [DISPATCHED IMMEDIATELY]" if within_hours else "⏰ [QUEUED UNTIL NEXT ALERT WINDOW]"
 
-def generate_slack_alerts(
-    slipped_node: TaskNode,
-    affected_tasks: List[TaskNode],
-    goal_rollups: Dict[str, Any],
-    sim_time: datetime
-) -> List[Dict[str, Any]]:
-    alerts = []
-    
-    within_hours = is_within_alert_hours(sim_time)
-    dispatch_header = "🟢 [DISPATCHED IMMEDIATELY]" if within_hours else "⏰ [QUEUED UNTIL NEXT ALERT WINDOW]"
-    next_window = None if within_hours else get_next_alert_window(sim_time).strftime("%A, %d %b %Y, 09:00 AM IST")
-
-    # Group affected tasks by owner (exclude the initiator if covered in root cause)
-    owner_tasks: Dict[str, List[TaskNode]] = {}
-    for t in affected_tasks:
-        if t.owner:
-            owner_tasks.setdefault(t.owner, []).append(t)
-
-    for owner, tasks in owner_tasks.items():
-        impacted_titles = [f"`{t.title}` ({t.status.upper()})" for t in tasks]
-        goal_impacts = list({t.goal for t in tasks if t.goal})
-        goal_names = [f"*{goal_rollups[g]['name']}* ({goal_rollups[g]['status'].upper()})" for g in goal_impacts if g in goal_rollups]
-        
-        # Suggested action
-        if any(t.status == "broken" for t in tasks):
-            action = "Fast-track vendor handoff, compress review cycle, or adjust downstream launch milestone in Notion."
-        else:
-            action = "Monitor timeline closely; buffer has shrunk below safety threshold."
-
-        slack_block = {
-            "recipient_owner": owner,
-            "alert_status": "queued" if not within_hours else "sent",
-            "dispatch_time_ist": sim_time.strftime("%Y-%m-%d %H:%M:%S IST"),
-            "delivery_status_display": f"{dispatch_header} (Next window: {next_window})" if not within_hours else dispatch_header,
+        # Alert to root owner (confirmation)
+        root_msg = {
+            "recipient_owner": root.owner,
+            "type": "root_confirmation",
+            "delivery_status": header,
             "slack_message_text": (
-                f"{dispatch_header}\n"
-                f"🚨 *Schedule Slip Alert: Impact on {owner}'s Deliverables*\n"
-                f"• *Root Cause:* `{slipped_node.title}` (owned by {slipped_node.owner}) slipped by *{slipped_node.days_slipped} day(s)* (new due date: {slipped_node.current_due_date}).\n"
-                f"• *Your Impacted Tasks:* {', '.join(impacted_titles)}\n"
-                f"• *Goals At Risk:* {', '.join(goal_names) if goal_names else 'N/A'}\n"
-                f"• *Reason:* {tasks[0].status_reason}\n"
-                f"• *Suggested Action:* {action}\n"
-                + (f"\n_Note: Sent outside operating hours (Mon-Sat 9am-7pm IST). Message queued until {next_window}._" if not within_hours else "")
+                f"{header}\n"
+                f"⚠️ *Schedule Update Confirmation Needed: {root.owner}*\n"
+                f"• *Task:* `{root.title}`\n"
+                f"• *Status:* Proposed slip of *{root.delay_days} day(s)* (committed: {root.committed_due_date} ➔ new: {root.projected_finish_date}).\n"
+                f"• *Action Required:* Please confirm or adjust this date in Notion to lock the new milestone.\n"
+                + (f"\n_Note: Outside alert hours (Mon-Sat 9am-7pm IST). Message queued until {next_window}._" if not within_hours else "")
             )
         }
-        alerts.append(slack_block)
-        
-    return alerts
+        alerts.append(root_msg)
 
-if __name__ == "__main__":
-    import sys
-    with open("data/approved_tasks.json") as f:
-        tasks_data = json.load(f)
+        # Downstream alerts grouped by owner
+        owner_tasks: Dict[str, List[TaskNode]] = {}
+        for node in self.nodes.values():
+            if node.id != root.id and node.status in ["broken", "at_risk"] and node.owner:
+                owner_tasks.setdefault(node.owner, []).append(node)
 
-    graph = DependencyGraph(tasks_data)
-    
-    # Slipping task-1 (Artwork Export) by 4 days
-    # Original due date: 2026-11-18 -> New due date: 2026-11-22
-    # Karan's sample production is due 2026-11-20, so buffer becomes NEGATIVE (-2 days) -> BROKEN!
-    print("=" * 80)
-    print("SIMULATING SCHEDULE SLIP: task-1 (Artwork Export) slips by 4 days")
-    print("=" * 80)
+        for owner, tasks in owner_tasks.items():
+            impact_lines = [f"• `{t.title}`: {t.diagnostic_reason}" for t in tasks]
+            affected_goals = list({t.goal for t in tasks if t.goal})
+            goal_lines = [f"• *{goal_rollups[g]['name']}* (Status: {goal_rollups[g]['status'].upper()}): {goal_rollups[g]['consequence_reason']}" 
+                          for g in affected_goals if g in goal_rollups]
 
-    # Test outside alert hours (e.g. 10:30 PM IST on Wednesday)
-    test_sim_time = datetime(2026, 11, 18, 22, 30, tzinfo=IST)
-    result = simulate_slip(graph, slipped_task_id="task-1", days_slipped=4, simulation_time_ist=test_sim_time)
+            action = (
+                "Expedite vendor turnaround, compress review cycle, or request milestone re-alignment in Notion."
+                if any(t.status == "broken" for t in tasks)
+                else "Monitor closely; schedule buffer has eroded below safety margins."
+            )
 
-    print("\n--- GOAL ROLL-UP STATUS ---")
-    for gid, ginfo in result["goals"].items():
-        print(f"Goal: {ginfo['name']} (Weight: {ginfo['weight']})")
-        print(f"  Status: {ginfo['status'].upper()}")
-        print(f"  Reason: {ginfo['reason']}")
+            msg = {
+                "recipient_owner": owner,
+                "type": "downstream_cascade_alert",
+                "delivery_status": header,
+                "slack_message_text": (
+                    f"{header}\n"
+                    f"🚨 *Upstream Delay Alert: Impact on {owner}'s Deliverables*\n"
+                    f"• *Root Cause:* `{root.title}` ({root.owner}) slipped by *{root.delay_days} day(s)* (projected finish: {root.projected_finish_date}).\n"
+                    f"• *Your Impacted Tasks:*\n" + "\n".join(impact_lines) + "\n"
+                    f"• *Company Goals Impacted:*\n" + "\n".join(goal_lines) + "\n"
+                    f"• *Suggested Action:* {action}\n"
+                    + (f"\n_Note: Outside alert hours (Mon-Sat 9am-7pm IST). Message queued until {next_window}._" if not within_hours else "")
+                )
+            }
+            alerts.append(msg)
 
-    print("\n--- AFFECTED DOWNSTREAM TASKS ---")
-    for t in result["affected_tasks"]:
-        print(f"• [{t['id']}] {t['title']} | Owner: {t['owner']} | Status: {t['status'].upper()} | Buffer: {t['buffer_remaining']}d")
-        print(f"   Reason: {t['reason']}")
-
-    print("\n--- SLACK ALERT DISPATCHES (RESPECTING 9am-7pm IST ALERT HOURS) ---")
-    for a in result["slack_alerts"]:
-        print("\n" + "#" * 60)
-        print(f"SLACK DM TO: {a['recipient_owner']}")
-        print(f"STATUS: {a['delivery_status_display']}")
-        print("-" * 60)
-        print(a["slack_message_text"])
-
-    # Persist simulation results
-    with open("logs/slip_simulation_result.json", "w") as f:
-        json.dump(result, f, indent=2)
-    print("\n" + "=" * 80)
-    print("Simulation results saved to logs/slip_simulation_result.json")
+        return alerts
