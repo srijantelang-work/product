@@ -3,7 +3,7 @@
   "tasks": [
     {
       "id": "task-1",
-      "title": "Export high‑resolution print‑ready artwork files",
+      "title": "Finalize and export high‑resolution print‑ready artwork files",
       "owner": "Pooja Patel",
       "due_date": "2026-11-18",
       "goal": "goal-1",
@@ -11,13 +11,13 @@
       "confidence": "high",
       "needs_confirmation": false,
       "reason": null,
-      "source_quote": "Pooja, finalize and export the high‑res print‑ready artwork files by this Wednesday (18 Nov 2026)."
+      "source_quote": "Pooja, finalize and export the high-res print-ready artwork files by this Wednesday (18 Nov 2026)."
     },
     {
       "id": "task-2",
       "title": "Send final design files to print vendor in Ahmedabad",
       "owner": "Karan Mehta",
-      "due_date": "2026-11-18",
+      "due_date": "2026-11-20",
       "goal": "goal-1",
       "depends_on": [
         "task-1"
@@ -29,48 +29,34 @@
     },
     {
       "id": "task-3",
-      "title": "Receive vendor sample box",
-      "owner": "Karan Mehta",
-      "due_date": "2026-11-20",
+      "title": "Inspect sample box and give final packaging approval",
+      "owner": "Aarav Sharma",
+      "due_date": "2026-11-23",
       "goal": "goal-1",
       "depends_on": [
         "task-2"
       ],
       "confidence": "high",
       "needs_confirmation": false,
-      "reason": null,
-      "source_quote": "Vendor needs 3 days, toh vendor sample Friday tak ready ho jayega (20 Nov 2026)."
+      "reason": "Co‑owner Pooja Patel is also involved but Aarav Sharma is the primary lead",
+      "source_quote": "Aarav and Pooja must inspect the sample box and give final packaging approval by Monday, 23 Nov 2026."
     },
     {
       "id": "task-4",
-      "title": "Inspect sample box and give final packaging approval",
-      "owner": "Aarav Sharma",
-      "due_date": "2026-11-23",
+      "title": "Trigger bulk packaging run and warehouse dispatch",
+      "owner": "Karan Mehta",
+      "due_date": null,
       "goal": "goal-1",
       "depends_on": [
         "task-3"
       ],
-      "confidence": "high",
-      "needs_confirmation": false,
-      "reason": null,
-      "source_quote": "Aarav and Pooja must inspect the sample box and give final packaging approval by Monday, 23 Nov 2026."
+      "confidence": "medium",
+      "needs_confirmation": true,
+      "reason": "No explicit deadline was set for this task",
+      "source_quote": "As soon as packaging approval comes in on 23 Nov, I will trigger the bulk packaging run and warehouse dispatch"
     },
     {
       "id": "task-5",
-      "title": "Trigger bulk packaging run and warehouse dispatch",
-      "owner": "Karan Mehta",
-      "due_date": "2026-11-23",
-      "goal": "goal-1",
-      "depends_on": [
-        "task-4"
-      ],
-      "confidence": "high",
-      "needs_confirmation": false,
-      "reason": null,
-      "source_quote": "As soon as packaging approval comes in on 23 Nov, I will trigger the bulk packaging run and warehouse dispatch."
-    },
-    {
-      "id": "task-6",
       "title": "Lock influencer roster for pre‑buzz campaign",
       "owner": "Ananya Joshi",
       "due_date": "2026-11-20",
@@ -82,34 +68,52 @@
       "source_quote": "I'll lock the influencer roster by Friday (20 Nov 2026)."
     },
     {
-      "id": "task-7",
-      "title": "Prepare 5 teaser motion reels for influencer pre‑buzz campaign",
+      "id": "task-6",
+      "title": "Prepare five teaser motion reels for influencer pre‑buzz campaign",
       "owner": "Pooja Patel",
-      "due_date": "2026-11-28",
+      "due_date": null,
       "goal": "goal-2",
       "depends_on": [],
-      "confidence": "high",
-      "needs_confirmation": false,
-      "reason": null,
+      "confidence": "medium",
+      "needs_confirmation": true,
+      "reason": "No deadline was specified for reel preparation",
       "source_quote": "Pooja, can you prepare 5 teaser motion reels?"
+    },
+    {
+      "id": "task-7",
+      "title": "Send final design files to vendor after receipt",
+      "owner": "Karan Mehta",
+      "due_date": null,
+      "goal": "goal-1",
+      "depends_on": [
+        "task-1"
+      ],
+      "confidence": "medium",
+      "needs_confirmation": true,
+      "reason": "No explicit deadline was set for sending files after receipt",
+      "source_quote": "once Pooja gives the final design files on Wednesday, I will send them to the print vendor in Ahmedabad"
     }
   ],
   "ignored_remarks": [
     {
       "quote": "The vendor seemed really nice when we met them over tea last week.",
-      "reason": "Opinion about vendor, not a task."
+      "reason": "Opinion about vendor, not an actionable task."
     },
     {
       "quote": "Also we need to rethink our unboxing card insertion, maybe add a QR code for discount.",
-      "reason": "Brainstorming, no commitment."
+      "reason": "Exploratory idea, no commitment."
     },
     {
       "quote": "Someone should write the campaign copy next week.",
-      "reason": "Exploratory idea, no assignment."
+      "reason": "Uncommitted brainstorming, no clear owner or deadline."
     },
     {
       "quote": "Shipping corrugated boxes order karva padshe, someone look into bulk carton rates.",
-      "reason": "Uncommitted suggestion, no owner or deadline."
+      "reason": "Uncommitted idea, no owner or deadline."
+    },
+    {
+      "quote": "Meeting ended with Vikram reminding everyone to keep deadlines tight.",
+      "reason": "General reminder, not a specific task."
     }
   ]
 }
