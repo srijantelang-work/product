@@ -273,7 +273,53 @@
       }
     ],
     "outcome": "success",
-    "human_decision": null,
+    "human_decision": {
+      "total_reviewed": 7,
+      "total_approved": 7,
+      "total_rejected": 0,
+      "decisions": [
+        {
+          "task_id": "task-1",
+          "action": "approved",
+          "modifications": null
+        },
+        {
+          "task_id": "task-2",
+          "action": "approved",
+          "modifications": null
+        },
+        {
+          "task_id": "task-3",
+          "action": "approved",
+          "modifications": null
+        },
+        {
+          "task_id": "task-4",
+          "action": "approved",
+          "modifications": null
+        },
+        {
+          "task_id": "task-5",
+          "action": "approved",
+          "modifications": null
+        },
+        {
+          "task_id": "task-6",
+          "action": "edited",
+          "modifications": {
+            "due_date": {
+              "from": "",
+              "to": "2026-11-25"
+            }
+          }
+        },
+        {
+          "task_id": "task-7",
+          "action": "approved",
+          "modifications": null
+        }
+      ]
+    },
     "final_output": {
       "meeting_date": "2026-11-16",
       "tasks": [
