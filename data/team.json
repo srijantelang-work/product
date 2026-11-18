@@ -1,0 +1,32 @@
+[
+  {
+    "id": "member-1",
+    "name": "Aarav Sharma",
+    "role": "Product Lead",
+    "email": "aarav@chaibrew.com"
+  },
+  {
+    "id": "member-2",
+    "name": "Pooja Patel",
+    "role": "Brand Designer",
+    "email": "pooja@chaibrew.com"
+  },
+  {
+    "id": "member-3",
+    "name": "Karan Mehta",
+    "role": "Supply Chain & Vendor Operations",
+    "email": "karan@chaibrew.com"
+  },
+  {
+    "id": "member-4",
+    "name": "Ananya Joshi",
+    "role": "Growth & Marketing",
+    "email": "ananya@chaibrew.com"
+  },
+  {
+    "id": "member-5",
+    "name": "Vikram Desai",
+    "role": "Founder / CEO",
+    "email": "vikram@chaibrew.com"
+  }
+]
