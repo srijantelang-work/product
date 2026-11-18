@@ -1,110 +1,225 @@
 import os
 import json
+import time
 import logging
-from typing import Tuple, Dict, Any
+from datetime import datetime
+from typing import Tuple, Dict, Any, List, Optional
 from dotenv import load_dotenv
 from groq import Groq
 from pydantic import ValidationError
 
 from src.schema import MeetingExtractionOutput
+from src.validate import validate_extraction, ValidationResult
 
-# Configure logger
 logging.basicConfig(level=logging.INFO, format="%(asctime)s [%(levelname)s] %(message)s")
 logger = logging.getLogger(__name__)
 
 load_dotenv()
 
-def load_file(filepath: str) -> str:
-    with open(filepath, "r", encoding="utf-8") as f:
-        return f.read()
+RUN_LOG_PATH = "logs/run_log.json"
 
-def extract_tasks_with_model(
+def log_run_telemetry(record: Dict[str, Any]):
+    os.makedirs("logs", exist_ok=True)
+    logs = []
+    if os.path.exists(RUN_LOG_PATH):
+        try:
+            with open(RUN_LOG_PATH, "r", encoding="utf-8") as f:
+                logs = json.load(f)
+        except Exception:
+            logs = []
+    logs.append(record)
+    with open(RUN_LOG_PATH, "w", encoding="utf-8") as f:
+        json.dump(logs, f, indent=2)
+    logger.info(f"Telemetry logged to {RUN_LOG_PATH}")
+
+def call_groq_api(
     client: Groq,
-    model_config: Dict[str, Any],
-    prompt: str
-) -> Tuple[bool, Any]:
-    model_id = model_config["id"]
-    logger.info(f"Invoking Groq model: {model_id} ({model_config.get('name')})")
+    model_cfg: Dict[str, Any],
+    messages: List[Dict[str, str]],
+    custom_max_tokens: Optional[int] = None
+) -> Tuple[bool, Optional[str], Optional[str], Dict[str, Any]]:
+    model_id = model_cfg["id"]
+    max_tokens = custom_max_tokens or model_cfg.get("max_completion_tokens", 4096)
     
-    try:
-        response = client.chat.completions.create(
-            model=model_id,
-            messages=[
-                {
-                    "role": "user",
-                    "content": prompt,
-                }
-            ],
-            response_format=model_config.get("response_format", {"type": "json_object"}),
-            temperature=model_config.get("temperature", 0.1),
-        )
-        raw_content = response.choices[0].message.content
-        logger.info(f"Model {model_id} responded. Content length: {len(raw_content)} chars.")
-        
-        parsed_json = json.loads(raw_content)
-        validated_output = MeetingExtractionOutput.model_validate(parsed_json)
-        return True, validated_output
-    except (json.JSONDecodeError, ValidationError) as e:
-        logger.warning(f"Validation or JSON parsing failed for model {model_id}: {e}")
-        return False, str(e)
-    except Exception as e:
-        logger.error(f"API call failed for model {model_id}: {e}")
-        return False, str(e)
+    kwargs = {
+        "model": model_id,
+        "messages": messages,
+        "temperature": model_cfg.get("temperature", 0.1),
+        "response_format": model_cfg.get("response_format", {"type": "json_object"}),
+        "max_completion_tokens": max_tokens,
+    }
+    if "reasoning_effort" in model_cfg:
+        kwargs["reasoning_effort"] = model_cfg["reasoning_effort"]
 
-def run_extraction_pipeline():
+    start_time = time.time()
+    try:
+        response = client.chat.completions.create(**kwargs)
+        duration_sec = round(time.time() - start_time, 3)
+        choice = response.choices[0]
+        content = choice.message.content or ""
+        finish_reason = choice.finish_reason
+        
+        usage = response.usage
+        telemetry = {
+            "duration_sec": duration_sec,
+            "finish_reason": finish_reason,
+            "prompt_tokens": usage.prompt_tokens if usage else 0,
+            "completion_tokens": usage.completion_tokens if usage else 0,
+            "total_tokens": usage.total_tokens if usage else 0,
+            "reasoning_tokens": getattr(usage.completion_tokens_details, "reasoning_tokens", 0) if usage and usage.completion_tokens_details else 0,
+        }
+        return True, content, finish_reason, telemetry
+    except Exception as e:
+        duration_sec = round(time.time() - start_time, 3)
+        return False, None, "api_error", {"duration_sec": duration_sec, "error": str(e)}
+
+def run_extraction_workflow():
     api_key = os.getenv("GROQ_API_KEY")
     if not api_key:
         raise ValueError("GROQ_API_KEY is not set.")
-    
     client = Groq(api_key=api_key)
 
-    # 1. Load configs & context
-    models_cfg = json.loads(load_file("config/models.json"))
-    prompt_template = load_file("config/prompt_v1.txt")
-    schema_json = load_file("config/schema.json")
-    team_json = load_file("data/team.json")
-    goals_json = load_file("data/goals.json")
-    meeting_notes = load_file("data/meeting_notes_2026-11-16.md")
-    
-    meeting_date = "2026-11-16"
+    # 1. Load context and configs
+    with open("config/models.json") as f: models_cfg = json.load(f)
+    with open("config/prompt_v1.txt") as f: prompt_template = f.read()
+    with open("config/schema.json") as f: schema_json = f.read()
+    with open("data/team.json") as f: team_list = json.load(f)
+    with open("data/goals.json") as f: goals_list = json.load(f)
+    with open("data/meeting_notes_2026-11-16.md") as f: raw_note = f.read()
 
-    # 2. Inject context into prompt template
+    meeting_date = "2026-11-16"
     rendered_prompt = prompt_template.format(
         meeting_date=meeting_date,
-        team_json=team_json,
-        goals_json=goals_json,
+        team_json=json.dumps(team_list, indent=2),
+        goals_json=json.dumps(goals_list, indent=2),
         schema_json=schema_json,
-        meeting_notes=meeting_notes,
+        meeting_notes=raw_note,
     )
 
-    # 3. Try primary model first (cost-optimized routing)
     primary_cfg = models_cfg["primary_model"]
-    logger.info(f"Attempting extraction with primary model: {primary_cfg['id']}")
-    success, result = extract_tasks_with_model(client, primary_cfg, rendered_prompt)
+    fallback_cfg = models_cfg["fallback_model"]
 
-    # 4. Fallback to larger model if primary fails validation or parse
-    if not success:
-        fallback_cfg = models_cfg["fallback_model"]
-        logger.warning(f"Primary model failed. Falling back to high-capacity model: {fallback_cfg['id']}")
-        success, result = extract_tasks_with_model(client, fallback_cfg, rendered_prompt)
-        if not success:
-            logger.error("Both primary and fallback models failed extraction.")
-            return
+    messages = [{"role": "user", "content": rendered_prompt}]
+    
+    current_model = primary_cfg
+    max_tokens = current_model.get("max_completion_tokens", 4096)
+    escalated_to_fallback = False
+    run_log_entry = {
+        "timestamp": datetime.utcnow().isoformat() + "Z",
+        "meeting_date": meeting_date,
+        "attempts": []
+    }
 
-    # 5. Persist output
-    output_path = "data/extracted_tasks.json"
-    with open(output_path, "w", encoding="utf-8") as f:
-        f.write(result.model_dump_json(indent=2))
-    logger.info(f"Successfully saved extracted and validated tasks to {output_path}")
+    max_attempts = 3
+    final_output = None
 
-    print("\n--- EXTRACTION SUMMARY ---")
-    print(f"Meeting Date: {result.meeting_date}")
-    print(f"Extracted Tasks ({len(result.tasks)}):")
-    for t in result.tasks:
-        print(f"  - [{t.id}] {t.title} | Owner: {t.owner} | Due: {t.due_date} | Depends on: {t.depends_on} | Needs Confirm: {t.needs_confirmation}")
-    print(f"\nIgnored Remarks ({len(result.ignored_remarks)}):")
-    for r in result.ignored_remarks:
-        print(f"  - \"{r.quote}\" -> Reason: {r.reason}")
+    for attempt_idx in range(1, max_attempts + 1):
+        logger.info(f"--- Attempt {attempt_idx}: Model={current_model['id']} (max_tokens={max_tokens}) ---")
+        success, content, finish_reason, telemetry = call_groq_api(
+            client, current_model, messages, custom_max_tokens=max_tokens
+        )
+        
+        attempt_record = {
+            "attempt": attempt_idx,
+            "model": current_model["id"],
+            "finish_reason": finish_reason,
+            "telemetry": telemetry,
+            "status": "pending",
+            "retry_reason": None,
+        }
+
+        # Failure Condition A: Length truncation
+        if finish_reason == "length":
+            logger.warning("Attempt hit token budget limit (finish_reason=length).")
+            attempt_record["status"] = "failed"
+            attempt_record["retry_reason"] = "length_budget_exceeded"
+            run_log_entry["attempts"].append(attempt_record)
+            
+            # Retry with larger budget if primary, else escalate
+            if not escalated_to_fallback and max_tokens < 8192:
+                max_tokens = 8192
+                logger.info(f"Expanding token budget to {max_tokens} and retrying primary model.")
+            else:
+                logger.info("Escalating to fallback model 120B due to repeated token budget exhaustion.")
+                current_model = fallback_cfg
+                escalated_to_fallback = True
+                max_tokens = fallback_cfg.get("max_completion_tokens", 4096)
+            continue
+
+        # Failure Condition B: API error or empty content
+        if not success or not content:
+            attempt_record["status"] = "failed"
+            attempt_record["retry_reason"] = f"api_error: {telemetry.get('error')}"
+            run_log_entry["attempts"].append(attempt_record)
+            logger.warning(f"API call failed: {telemetry.get('error')}. Escalating to fallback.")
+            current_model = fallback_cfg
+            escalated_to_fallback = True
+            continue
+
+        # Parse JSON and validate Pydantic schema
+        try:
+            parsed_json = json.loads(content)
+            validated_pydantic = MeetingExtractionOutput.model_validate(parsed_json)
+        except (json.JSONDecodeError, ValidationError) as e:
+            attempt_record["status"] = "failed"
+            attempt_record["retry_reason"] = f"schema_validation_error: {str(e)}"
+            run_log_entry["attempts"].append(attempt_record)
+            logger.warning(f"Schema validation failed: {e}. Retrying with feedback.")
+            # Inject error feedback into conversation history
+            messages.append({"role": "assistant", "content": content})
+            messages.append({"role": "user", "content": f"Your output violated the schema: {str(e)}. Please correct and re-emit strict JSON."})
+            continue
+
+        # Run Business Rule Validation
+        val_result = validate_extraction(
+            extraction_data=parsed_json,
+            raw_meeting_notes=raw_note,
+            team_members=team_list,
+            goals=goals_list
+        )
+
+        attempt_record["business_rule_validation"] = {
+            "is_valid": val_result.is_valid,
+            "error_count": len(val_result.errors),
+            "errors": [e.model_dump() for e in val_result.errors],
+            "warning_count": len(val_result.warnings),
+            "warnings": [w.model_dump() for w in val_result.warnings],
+        }
+
+        if not val_result.is_valid:
+            error_msgs = "; ".join([e.message for e in val_result.errors])
+            attempt_record["status"] = "failed"
+            attempt_record["retry_reason"] = f"business_rule_violation: {error_msgs}"
+            run_log_entry["attempts"].append(attempt_record)
+            logger.warning(f"Business rules violated: {error_msgs}. Retrying with feedback.")
+            
+            # Feed validation errors back to model
+            feedback = f"Your task extraction has business rule errors: {error_msgs}. Please fix these and return corrected JSON adhering to the schema."
+            messages.append({"role": "assistant", "content": content})
+            messages.append({"role": "user", "content": feedback})
+            continue
+
+        # Success!
+        attempt_record["status"] = "success"
+        run_log_entry["attempts"].append(attempt_record)
+        run_log_entry["final_status"] = "success"
+        run_log_entry["selected_model"] = current_model["id"]
+        final_output = validated_pydantic
+        break
+
+    log_run_telemetry(run_log_entry)
+
+    if final_output:
+        with open("data/extracted_tasks.json", "w", encoding="utf-8") as f:
+            f.write(final_output.model_dump_json(indent=2))
+        logger.info(f"Successfully extracted and validated {len(final_output.tasks)} tasks!")
+        print("\n=== PIPELINE SUCCESSFUL ===")
+        print(f"Model used: {run_log_entry['selected_model']}")
+        print(f"Attempts: {len(run_log_entry['attempts'])}")
+        print(f"Tasks extracted: {len(final_output.tasks)}")
+        print(f"Ignored remarks: {len(final_output.ignored_remarks)}")
+    else:
+        logger.error("Extraction pipeline failed after max retries.")
 
 if __name__ == "__main__":
-    run_extraction_pipeline()
+    run_extraction_workflow()
