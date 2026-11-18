@@ -1,0 +1,59 @@
+{
+  "slipped_task": {
+    "id": "task-1",
+    "title": "Finalize and export print-ready packaging artwork files",
+    "days_slipped": 4,
+    "original_due_date": "2026-11-18",
+    "new_due_date": "2026-11-22"
+  },
+  "affected_tasks": [
+    {
+      "id": "task-1",
+      "title": "Finalize and export print-ready packaging artwork files",
+      "owner": "Pooja Patel",
+      "status": "broken",
+      "buffer_remaining": null,
+      "reason": "Primary source of delay: slipped by 4 days."
+    },
+    {
+      "id": "task-2",
+      "title": "Produce physical sample box with Ahmedabad print vendor",
+      "owner": "Karan Mehta",
+      "status": "broken",
+      "buffer_remaining": -2,
+      "reason": "Upstream task 'Finalize and export print-ready packaging artwork files' finishes on 2026-11-22, which is 2 day(s) AFTER downstream task 'Produce physical sample box with Ahmedabad print vendor' is due (2026-11-20)."
+    }
+  ],
+  "goals": {
+    "goal-1": {
+      "name": "Diwali Artisan Chai Gift Box Launch",
+      "target_date": "2026-12-05",
+      "weight": 3,
+      "status": "off_track",
+      "reason": "Primary source of delay: slipped by 4 days."
+    },
+    "goal-2": {
+      "name": "Social Media Influencer Pre-buzz Campaign",
+      "target_date": "2026-11-28",
+      "weight": 2,
+      "status": "on_track",
+      "reason": "All milestone tasks on schedule."
+    }
+  },
+  "slack_alerts": [
+    {
+      "recipient_owner": "Pooja Patel",
+      "alert_status": "queued",
+      "dispatch_time_ist": "2026-11-18 22:30:00 IST",
+      "delivery_status_display": "\u23f0 [QUEUED UNTIL NEXT ALERT WINDOW] (Next window: Thursday, 19 Nov 2026, 09:00 AM IST)",
+      "slack_message_text": "\u23f0 [QUEUED UNTIL NEXT ALERT WINDOW]\n\ud83d\udea8 *Schedule Slip Alert: Impact on Pooja Patel's Deliverables*\n\u2022 *Root Cause:* `Finalize and export print-ready packaging artwork files` (owned by Pooja Patel) slipped by *4 day(s)* (new due date: 2026-11-22).\n\u2022 *Your Impacted Tasks:* `Finalize and export print-ready packaging artwork files` (BROKEN)\n\u2022 *Goals At Risk:* *Diwali Artisan Chai Gift Box Launch* (OFF_TRACK)\n\u2022 *Reason:* Primary source of delay: slipped by 4 days.\n\u2022 *Suggested Action:* Fast-track vendor handoff, compress review cycle, or adjust downstream launch milestone in Notion.\n\n_Note: Sent outside operating hours (Mon-Sat 9am-7pm IST). Message queued until Thursday, 19 Nov 2026, 09:00 AM IST._"
+    },
+    {
+      "recipient_owner": "Karan Mehta",
+      "alert_status": "queued",
+      "dispatch_time_ist": "2026-11-18 22:30:00 IST",
+      "delivery_status_display": "\u23f0 [QUEUED UNTIL NEXT ALERT WINDOW] (Next window: Thursday, 19 Nov 2026, 09:00 AM IST)",
+      "slack_message_text": "\u23f0 [QUEUED UNTIL NEXT ALERT WINDOW]\n\ud83d\udea8 *Schedule Slip Alert: Impact on Karan Mehta's Deliverables*\n\u2022 *Root Cause:* `Finalize and export print-ready packaging artwork files` (owned by Pooja Patel) slipped by *4 day(s)* (new due date: 2026-11-22).\n\u2022 *Your Impacted Tasks:* `Produce physical sample box with Ahmedabad print vendor` (BROKEN)\n\u2022 *Goals At Risk:* *Diwali Artisan Chai Gift Box Launch* (OFF_TRACK)\n\u2022 *Reason:* Upstream task 'Finalize and export print-ready packaging artwork files' finishes on 2026-11-22, which is 2 day(s) AFTER downstream task 'Produce physical sample box with Ahmedabad print vendor' is due (2026-11-20).\n\u2022 *Suggested Action:* Fast-track vendor handoff, compress review cycle, or adjust downstream launch milestone in Notion.\n\n_Note: Sent outside operating hours (Mon-Sat 9am-7pm IST). Message queued until Thursday, 19 Nov 2026, 09:00 AM IST._"
+    }
+  ]
+}

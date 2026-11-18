@@ -1,7 +1,7 @@
 [
   {
     "id": "task-1",
-    "title": "Finalize and export high\u2011resolution print\u2011ready artwork files",
+    "title": "Finalize and export print-ready packaging artwork files",
     "owner": "Pooja Patel",
     "due_date": "2026-11-18",
     "goal": "goal-1",
@@ -14,7 +14,7 @@
   },
   {
     "id": "task-2",
-    "title": "Send final design files to print vendor in Ahmedabad",
+    "title": "Produce physical sample box with Ahmedabad print vendor",
     "owner": "Karan Mehta",
     "due_date": "2026-11-20",
     "goal": "goal-1",
@@ -24,7 +24,7 @@
     "confidence": "high",
     "needs_confirmation": false,
     "reason": null,
-    "source_quote": "once Pooja gives the final design files on Wednesday, I will send them to the print vendor in Ahmedabad to produce the physical sample box.",
+    "source_quote": "once Pooja gives the final design files on Wednesday, I will send them to the print vendor in Ahmedabad to produce the physical sample box. Vendor needs 3 days, toh vendor sample Friday tak ready ho jayega (20 Nov 2026).",
     "approval_status": "approved"
   },
   {
@@ -38,28 +38,28 @@
     ],
     "confidence": "high",
     "needs_confirmation": false,
-    "reason": "Co\u2011owner Pooja Patel is also involved but Aarav Sharma is the primary lead",
+    "reason": "Aarav Sharma primary inspection lead",
     "source_quote": "Aarav and Pooja must inspect the sample box and give final packaging approval by Monday, 23 Nov 2026.",
     "approval_status": "approved"
   },
   {
     "id": "task-4",
-    "title": "Trigger bulk packaging run and warehouse dispatch",
+    "title": "Trigger bulk packaging production run and warehouse dispatch",
     "owner": "Karan Mehta",
-    "due_date": null,
+    "due_date": "2026-12-05",
     "goal": "goal-1",
     "depends_on": [
       "task-3"
     ],
-    "confidence": "medium",
-    "needs_confirmation": true,
-    "reason": "No explicit deadline was set for this task",
-    "source_quote": "As soon as packaging approval comes in on 23 Nov, I will trigger the bulk packaging run and warehouse dispatch",
+    "confidence": "high",
+    "needs_confirmation": false,
+    "reason": null,
+    "source_quote": "As soon as packaging approval comes in on 23 Nov, I will trigger the bulk packaging run and warehouse dispatch so that our final product launch happens smoothly on 5 Dec 2026.",
     "approval_status": "approved"
   },
   {
     "id": "task-5",
-    "title": "Lock influencer roster for pre\u2011buzz campaign",
+    "title": "Lock micro-influencer roster for pre-buzz campaign",
     "owner": "Ananya Joshi",
     "due_date": "2026-11-20",
     "goal": "goal-2",
@@ -72,30 +72,17 @@
   },
   {
     "id": "task-6",
-    "title": "Prepare five teaser motion reels for influencer pre\u2011buzz campaign",
+    "title": "Prepare 5 teaser motion reels for influencer pre-buzz campaign",
     "owner": "Pooja Patel",
     "due_date": "2026-11-25",
     "goal": "goal-2",
-    "depends_on": [],
-    "confidence": "medium",
-    "needs_confirmation": false,
-    "reason": "No deadline was specified for reel preparation",
-    "source_quote": "Pooja, can you prepare 5 teaser motion reels?",
-    "approval_status": "edited_and_approved"
-  },
-  {
-    "id": "task-7",
-    "title": "Send final design files to vendor after receipt",
-    "owner": "Karan Mehta",
-    "due_date": null,
-    "goal": "goal-1",
     "depends_on": [
-      "task-1"
+      "task-5"
     ],
     "confidence": "medium",
-    "needs_confirmation": true,
-    "reason": "No explicit deadline was set for sending files after receipt",
-    "source_quote": "once Pooja gives the final design files on Wednesday, I will send them to the print vendor in Ahmedabad",
-    "approval_status": "approved"
+    "needs_confirmation": false,
+    "reason": "Date confirmed by human reviewer in approval step",
+    "source_quote": "Pooja, can you prepare 5 teaser motion reels?",
+    "approval_status": "edited_and_approved"
   }
 ]
