@@ -42,6 +42,7 @@ class TaskNode:
         self.goal = data.get("goal")
         self.committed_due_date = data.get("due_date")
         self.projected_finish_date = data.get("due_date")
+        self.estimated_duration_days: int = data.get("estimated_duration_days", 1)
         self.depends_on: List[str] = data.get("depends_on", [])
         self.downstream: List[str] = []
         self.status = "safe"  # safe, at_risk, broken
@@ -52,21 +53,14 @@ class TaskNode:
 class CascadeDependencyGraph:
     def __init__(self, tasks: List[Dict[str, Any]]):
         self.nodes: Dict[str, TaskNode] = {t["id"]: TaskNode(t) for t in tasks}
-        self.planned_durations: Dict[Tuple[str, str], int] = {}
-        self._build_edges_and_durations()
+        self._build_edges()
 
-    def _build_edges_and_durations(self):
+    def _build_edges(self):
+        """Build downstream edges from depends_on relationships."""
         for node in self.nodes.values():
             for parent_id in node.depends_on:
                 if parent_id in self.nodes:
                     self.nodes[parent_id].downstream.append(node.id)
-                    parent_due = parse_date(self.nodes[parent_id].committed_due_date)
-                    child_due = parse_date(node.committed_due_date)
-                    if parent_due and child_due and child_due >= parent_due:
-                        gap = (child_due - parent_due).days
-                    else:
-                        gap = 1
-                    self.planned_durations[(parent_id, node.id)] = gap
 
     def topological_order(self) -> List[str]:
         in_degree = {nid: len(n.depends_on) for nid, n in self.nodes.items()}
@@ -90,6 +84,7 @@ class CascadeDependencyGraph:
         if slipped_task_id not in self.nodes:
             raise ValueError(f"Task {slipped_task_id} not found.")
 
+        # Reset all nodes
         for node in self.nodes.values():
             node.projected_finish_date = node.committed_due_date
             node.status = "safe"
@@ -97,6 +92,7 @@ class CascadeDependencyGraph:
             node.delay_days = 0
             node.diagnostic_reason = None
 
+        # Apply slip to root task
         root = self.nodes[slipped_task_id]
         root_committed_dt = parse_date(root.committed_due_date)
         if not root_committed_dt:
@@ -105,11 +101,22 @@ class CascadeDependencyGraph:
         root.delay_days = slip_days
         new_root_finish = root_committed_dt + timedelta(days=slip_days)
         root.projected_finish_date = format_date(new_root_finish)
-        
+
         if slip_days > 0:
             root.status = "broken"
-            root.diagnostic_reason = f"Root cause of delay: slipped by {slip_days} day(s) from committed date {root.committed_due_date} to {root.projected_finish_date}."
+            root.diagnostic_reason = (
+                f"Root cause of delay: slipped by {slip_days} day(s) "
+                f"from committed date {root.committed_due_date} to {root.projected_finish_date}."
+            )
 
+        # Propagate through topological order
+        # Key change: separate duration from slack.
+        # For each child:
+        #   earliest_start = max(upstream projected finish dates)
+        #   projected_finish = earliest_start + child.estimated_duration_days
+        #   But projected_finish can't be earlier than committed_due (work won't start early)
+        #   slack = planned_gap - child.estimated_duration_days
+        #   buffer_remaining = committed_due - projected_finish (in days)
         topo_order = self.topological_order()
         start_eval = False
 
@@ -125,50 +132,71 @@ class CascadeDependencyGraph:
             if not committed_dt or not node.depends_on:
                 continue
 
-            earliest_finish = committed_dt
-            min_buffer = 999
+            # Find the latest upstream projected finish (the bottleneck parent)
+            latest_upstream_finish = None
             controlling_parent = None
 
             for parent_id in node.depends_on:
-                parent = self.nodes[parent_id]
+                parent = self.nodes.get(parent_id)
+                if not parent:
+                    continue
                 parent_proj_dt = parse_date(parent.projected_finish_date)
                 if not parent_proj_dt:
                     continue
-                
-                planned_gap = self.planned_durations.get((parent_id, node.id), 1)
-                required_child_finish = parent_proj_dt + timedelta(days=planned_gap)
-                if required_child_finish > earliest_finish:
-                    earliest_finish = required_child_finish
+                if latest_upstream_finish is None or parent_proj_dt > latest_upstream_finish:
+                    latest_upstream_finish = parent_proj_dt
                     controlling_parent = parent
 
-                buffer_gap = (committed_dt - parent_proj_dt).days
-                if buffer_gap < min_buffer:
-                    min_buffer = buffer_gap
+            if latest_upstream_finish is None:
+                continue
 
-            node.projected_finish_date = format_date(earliest_finish)
-            node.buffer_remaining = min_buffer
+            # Child can't start until upstream finishes.
+            # work_finish = when the work would actually complete if started right after upstream.
+            work_finish = latest_upstream_finish + timedelta(days=node.estimated_duration_days)
 
-            if earliest_finish > committed_dt:
-                days_over = (earliest_finish - committed_dt).days
+            # Buffer: how many days of slack between work_finish and committed due date.
+            # Positive = slack remaining, negative = overdue.
+            buffer = (committed_dt - work_finish).days
+            node.buffer_remaining = buffer
+
+            # For display/propagation: if work finishes after committed, that's the new projected date.
+            # If work finishes before committed, projected stays at committed (we don't finish early for
+            # downstream propagation purposes — but we report the real buffer above).
+            projected_finish = max(work_finish, committed_dt)
+            node.projected_finish_date = format_date(projected_finish)
+
+            if work_finish > committed_dt:
+                # BROKEN: projected finish is past committed due date
+                days_over = (projected_finish - committed_dt).days
                 node.delay_days = days_over
                 node.status = "broken"
                 node.diagnostic_reason = (
-                    f"Cascade bottleneck: finishes {days_over} day(s) late on {format_date(earliest_finish)} "
-                    f"(committed: {format_date(committed_dt)}) due to upstream slip on '{controlling_parent.title}'."
+                    f"Cascade impact: will finish {days_over} day(s) late on {format_date(projected_finish)} "
+                    f"(committed: {format_date(committed_dt)}). "
+                    f"Upstream '{controlling_parent.title}' now finishes {controlling_parent.projected_finish_date}, "
+                    f"plus {node.estimated_duration_days}d of work pushes past deadline."
                 )
-            elif min_buffer <= BUFFER_THRESHOLD_DAYS:
+            elif buffer <= BUFFER_THRESHOLD_DAYS:
+                # AT_RISK: makes it, but slack has eroded to threshold or below
                 node.status = "at_risk"
                 node.diagnostic_reason = (
-                    f"Timeline at risk: buffer with upstream '{controlling_parent.title}' "
-                    f"eroded to {min_buffer} day(s) (threshold: <= {BUFFER_THRESHOLD_DAYS} day)."
+                    f"Buffer eroded: only {buffer} day(s) of slack remaining "
+                    f"(threshold: ≤ {BUFFER_THRESHOLD_DAYS}d). "
+                    f"Upstream '{controlling_parent.title}' finishes {controlling_parent.projected_finish_date}, "
+                    f"plus {node.estimated_duration_days}d of work leaves tight margin."
                 )
             else:
+                # SAFE: slack absorbed the delay
                 node.status = "safe"
-                node.diagnostic_reason = f"Healthy buffer of {min_buffer} day(s)."
+                node.diagnostic_reason = (
+                    f"Slack absorbed: {buffer} day(s) of buffer remaining. "
+                    f"Upstream delay did not consume enough slack to threaten this deadline."
+                )
 
         goal_rollups = self._compute_goal_rollups()
         alerts = self._build_slack_alerts(root, simulation_time_ist, goal_rollups)
 
+        # Include all evaluated downstream tasks (not just broken/at_risk) for transparency
         return {
             "root_cause_task": {
                 "id": root.id,
@@ -185,11 +213,12 @@ class CascadeDependencyGraph:
                     "owner": self.nodes[nid].owner,
                     "committed_date": self.nodes[nid].committed_due_date,
                     "projected_finish": self.nodes[nid].projected_finish_date,
+                    "estimated_duration_days": self.nodes[nid].estimated_duration_days,
                     "status": self.nodes[nid].status,
                     "buffer_remaining": self.nodes[nid].buffer_remaining,
                     "reason": self.nodes[nid].diagnostic_reason
                 }
-                for nid in topo_order if nid != slipped_task_id and self.nodes[nid].status in ["broken", "at_risk"]
+                for nid in topo_order if nid != slipped_task_id and self.nodes[nid].depends_on
             ],
             "goal_rollups": goal_rollups,
             "slack_alerts": alerts
@@ -209,15 +238,32 @@ class CascadeDependencyGraph:
             broken_tasks = [t for t in tasks if t.status == "broken"]
             at_risk_tasks = [t for t in tasks if t.status == "at_risk"]
 
-            latest_task_finish = max([parse_date(t.projected_finish_date) for t in tasks if parse_date(t.projected_finish_date)])
+            projected_dates = [parse_date(t.projected_finish_date) for t in tasks if parse_date(t.projected_finish_date)]
+            latest_task_finish = max(projected_dates) if projected_dates else None
 
-            if broken_tasks or (latest_task_finish and latest_task_finish > target_dt):
+            if latest_task_finish and latest_task_finish > target_dt:
+                # Goal target date will be missed
                 status = "off_track"
-                slip_delta = (latest_task_finish - target_dt).days if (latest_task_finish and latest_task_finish > target_dt) else broken_tasks[0].delay_days
-                reason = f"Launch will miss target {ginfo['target_date']} by {slip_delta} day(s) because '{broken_tasks[0].title}' is delayed."
+                slip_delta = (latest_task_finish - target_dt).days
+                worst_task = max(broken_tasks, key=lambda t: t.delay_days) if broken_tasks else tasks[0]
+                reason = (
+                    f"Launch will miss target {ginfo['target_date']} by {slip_delta} day(s). "
+                    f"Critical path: '{worst_task.title}' now finishes {worst_task.projected_finish_date}."
+                )
+            elif broken_tasks:
+                # Intermediate tasks broken but final goal deadline still met — schedule compressed
+                status = "at_risk"
+                reason = (
+                    f"Schedule compressed: '{broken_tasks[0].title}' finishes "
+                    f"{broken_tasks[0].delay_days} day(s) late. Launch date {ginfo['target_date']} "
+                    f"still achievable but downstream slack is consumed."
+                )
             elif at_risk_tasks:
                 status = "at_risk"
-                reason = f"Milestone tight; '{at_risk_tasks[0].title}' buffer eroded to {at_risk_tasks[0].buffer_remaining} day(s)."
+                reason = (
+                    f"Milestone tight: '{at_risk_tasks[0].title}' has only "
+                    f"{at_risk_tasks[0].buffer_remaining} day(s) of buffer remaining."
+                )
             else:
                 status = "on_track"
                 reason = "All milestone deliverables on schedule with healthy buffers."
@@ -259,7 +305,7 @@ class CascadeDependencyGraph:
         }
         alerts.append(root_msg)
 
-        # Downstream alerts grouped by owner
+        # Downstream alerts grouped by owner — only for broken or at_risk tasks
         owner_tasks: Dict[str, List[TaskNode]] = {}
         for node in self.nodes.values():
             if node.id != root.id and node.status in ["broken", "at_risk"] and node.owner:
