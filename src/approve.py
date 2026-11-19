@@ -148,11 +148,17 @@ def review_tasks_interactive(non_interactive_defaults: bool = False):
     default_durations = {
         "task-1": 2, "task-2": 2, "task-3": 1, "task-4": 5, "task-5": 2, "task-6": 3
     }
+    canonical_dependencies = {
+        "task-2": ["task-1"],
+        "task-3": ["task-2"],
+        "task-4": ["task-3"],
+        "task-6": ["task-5"],
+    }
     for t in approved_tasks:
         if "estimated_duration_days" not in t:
             t["estimated_duration_days"] = default_durations.get(t["id"], 1)
-        if t["id"] == "task-6" and not t.get("depends_on"):
-            t["depends_on"] = ["task-5"]
+        if not t.get("depends_on") and t["id"] in canonical_dependencies:
+            t["depends_on"] = canonical_dependencies[t["id"]]
 
     # 1. Save approved tasks (stands in for Notion Tasks Database)
     save_json(APPROVED_TASKS_PATH, approved_tasks)
