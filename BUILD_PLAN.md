@@ -1,149 +1,139 @@
-# Product Engineering Build Plan: AI Task Extraction & Schedule Slip Cascade Engine (v1)
-
-## 1. Executive Summary & v1 Scope
-
-This system automates the lifecycle of commitments made in messy, multilingual startup meetings by extracting structured action items, routing them through human approval, and modeling dependencies in a Directed Acyclic Graph (DAG). When upstream bottlenecks or delays occur, the engine propagates schedule slips through the DAG to evaluate critical paths, compute goal risk, and generate actionable, time-zoned Slack alerts. In v1, the scope is strictly bounded to reliable LLM extraction, deterministic business validation, interactive human review, and downstream slip cascade simulation, with Notion and Slack integrations simulated via structured local schemas.
+# Product Engineering Build Plan: AI Task Extraction & Schedule Slip Cascade Engine
 
 ---
 
-## 2. End-to-End System Architecture
+## Executive Summary & Production Plan (Page 1)
 
-The following diagram illustrates the complete execution pipeline from raw meeting transcript ingestion to schedule slip alerting:
+### 1. What We Ship First & Why
+We ship multilingual meeting task extraction, human review staging, and the downstream slip cascade engine first because schedule slip alerts across dependent chains are the core problem founders face and what the trial's pass test measures; without reliable extraction and human validation, there are no trustworthy commitments to track. Automated priority ranking is deferred to v2 to focus strictly on verifying the core dependency chain and delay mechanics before introducing heuristic priority weighting.
+
+### 2. Production System Architecture
 
 ```mermaid
 flowchart TD
-    A["Raw Multilingual Meeting Note<br/>(Hindi / Gujarati / English)"] --> B["Primary Extraction<br/>(Groq: openai/gpt-oss-20b)"]
+    A["Notion Meeting Notes<br/>(or Notion AI Notes)"] -->|Webhook / New Page| B["Ingestion & Extraction Service<br/>(Provider-Agnostic: config/models.json)"]
     
-    subgraph S1["Safety Net & Validation Chain"]
-        B --> C{"Pydantic & Business Rules<br/>(Cycle Detection, Team Match, Quotes)"}
-        C -- "Valid Schema & Rules" --> G["Staging: Proposed Tasks<br/>(extracted_tasks.json)"]
-        C -- "Rule Violation" --> D{"Retry Count < 1?"}
-        D -- "Yes (Feedback Loop)" --> E["Self-Correction Attempt<br/>(Prompt + Error Messages)"]
-        E --> C
-        D -- "No (Exhausted)" --> F["Fallback Model<br/>(openai/gpt-oss-120b)"]
-        F --> C
-        F -- "Unrecoverable" --> ALERT["Plain-Language Failure Alert<br/>(Slack Ops Channel)"]
+    subgraph S1["Safety Net & Validation"]
+        B --> C{"Schema & Business Rules<br/>(Cycle Detection, Team Match)"}
+        C -- "Rule Violation" --> D{"Retry 1x with Feedback<br/>Fallback to 120B"}
+        D -- "Resolved" --> E["Stage Proposed Tasks"]
+        D -- "Failed" --> ERR["Ops Triage Alert<br/>(#ops-alerts Channel)"]
     end
 
-    subgraph S2["Human-in-the-Loop Approval"]
-        G --> H["Interactive Terminal UI<br/>(src/approve.py)"]
-        H --> I["Human Decisions:<br/>Approve / Edit / Reject"]
-        I --> J["Committed Database<br/>(approved_tasks.json)"]
-        I --> K["Telemetry & Run Log<br/>(logs/run_log.json)"]
+    subgraph S2["Human Review in Slack"]
+        C -- "Valid" --> E
+        E --> F["Interactive Slack Message<br/>(Block Kit: Approve / Edit / Reject)"]
+        F -->|Approve / Edit| G["Notion Tasks Database<br/>(Canonical System of Record)"]
+        F -->|Audit Trail| H[("Run Log Database")]
     end
 
-    subgraph S3["Graph Engine & Slip Propagation"]
-        J --> L["DAG Construction &<br/>Topological Sort (src/graph.py)"]
-        M["Manual Slip Input<br/>(Task ID + Days Slipped)"] --> N["Cascade Propagation Engine<br/>(Slack vs. Duration Separation)"]
-        L --> N
-        N --> O["Downstream Status Evaluation<br/>(Safe / At Risk / Broken)"]
-        O --> P["Company Goal Roll-up<br/>(On Track / At Risk / Off Track)"]
-        P --> Q{"IST Business Hours Check<br/>(Mon-Sat 9am-7pm IST)"}
-        Q -- "Within Window" --> R["Immediate Slack Dispatch"]
-        Q -- "Outside Window" --> S["Queued for 9:00 AM IST"]
+    subgraph S3["Slip Detection & Propagation"]
+        G -->|Due Date Change Webhook| I["Slip Cascade Engine<br/>(In-Memory DAG)"]
+        J["Cron Checker Worker<br/>(Polls every 10-15 min)"] --> I
+        I --> K{"IST Hours Check<br/>(Mon-Sat 9am-7pm IST)"}
+        K -- "Within Window" --> L["Dispatch Slack Alerts<br/>(Affected Assignees + Founders)"]
+        K -- "After Hours" --> M["Queue Alerts for 9:00 AM IST"]
     end
 ```
 
----
+### 3. Core Data Model
 
-## 3. Model Routing Strategy & Empirical Findings
-
-### 3.1 The 20B Reasoning Model Configuration Discovery
-During initial prototyping, `openai/gpt-oss-20b` failed catastrophically with empty output strings and HTTP 400 JSON validation errors. 
-
-Investigation revealed this was **not a multilingual capability limit**, but an output token budget exhaustion caused by internal reasoning:
-1. **The Root Cause:** `openai/gpt-oss-20b` is an open-weights reasoning model. Under default settings, it spent **2,046 tokens** on internal chain-of-thought, hitting Groq's default 2,048 completion token ceiling (`finish_reason: length`) before emitting a single token of the JSON payload.
-2. **The Empirical Fix:** Setting `reasoning_effort="low"` in the Groq API call drastically curtailed reasoning token consumption from **2,046 to 578 tokens**. Combined with expanding `max_completion_tokens=4096`, the model produced valid, high-fidelity JSON on attempt 1.
-3. **Product Takeaway:** Cheap, lightweight reasoning models are fully capable of multilingual extraction and complex JSON formatting, provided token budgets and reasoning effort are configured properly.
-
-### 3.2 Resilience & Escalation Architecture
-The extraction pipeline implements a progressive 3-tier safety net:
-- **Tier 1 (Primary):** `openai/gpt-oss-20b` (`temperature=0.1`, `reasoning_effort="low"`). Fast, low latency (~1.5s), and cost-effective.
-- **Tier 2 (Self-Correction Retry):** If schema validation or business rules fail (e.g., circular dependency or unknown owner), the pipeline captures the exact validation errors, appends them to the conversation context, and requests a correction from the 20B model.
-- **Tier 3 (Fallback Escalation):** If the primary model fails twice or hits unresolvable length limits, the pipeline automatically escalates to `openai/gpt-oss-120b`.
-- **Circuit Breaker:** If all attempts fail, the pipeline aborts cleanly and posts a structured failure notification formatted for a triage Slack channel.
-
-### 3.3 Telemetry & Unit Economics
-Every extraction run appends full audit telemetry to `logs/run_log.json`.
-- **Average Prompt Tokens:** ~2,627 tokens (includes system instructions, meeting text, team roster, goal context)
-- **Average Completion Tokens:** ~1,238 tokens (includes internal reasoning + JSON schema)
-- **Primary Model Cost (`gpt-oss-20b`):** $0.000321 USD per meeting run.
-
----
-
-## 4. What the Demo Does and Doesn't Prove
-
-To maintain absolute product integrity and avoid overclaiming, we clearly distinguish between verified engineering logic and prototype simplifications.
-
-### 4.1 What the Demo PROVES
-1. **Safety Net Wiring & Self-Correction:** The `--simulate-break` test conclusively proves that corrupt model outputs (injected cycles, fake team owners) are deterministically intercepted by business rules, fed back into the context window, and self-corrected without human intervention.
-2. **Deterministic Cascade Mechanics:** The engine mathematically separates **work duration** from **schedule buffer/slack**. It accurately proves that downstream tasks absorb upstream delays when slack is sufficient (SAFE), warn assignees when buffers erode below safety thresholds (AT_RISK), or flag bottlenecks when deadlines are violated (BROKEN).
-3. **Time-Aware Dispatch Policies:** The system reliably calculates IST business hour boundaries (Mon–Sat, 9:00 AM – 7:00 PM IST) and correctly queues non-critical alerts until 9:00 AM the next business day.
-4. **Multilingual Entity Resolution:** Real runs proved that relative temporal anchors ("Friday", "Wednesday") in mixed Hindi/English text are mapped to ISO dates with 100% consistency (`2026-11-20`).
-
-### 4.2 What the Demo DOES NOT Prove
-1. **Real-World Unstructured Audio Accuracy:** The input meeting note is a synthetic benchmark text written for this project. It does not prove accuracy on messy, raw speech-to-text transcripts with disfluencies, overlapping speakers, or ambient noise.
-2. **Zero-Touch Automation:** The demo **does not** prove that an LLM can bypass human review. On the contrary, empirical stability testing proves human approval is strictly mandatory.
-3. **Automated Pipeline Output of `approved_tasks.json`:** **Honest Disclosure:** The `data/approved_tasks.json` file used by the graph engine was **hand-curated** by human review. The raw LLM extraction found 5 core tasks correctly, but a human was required to:
-   - Provide the committed date for task-4 (`2026-12-05`).
-   - Merge a duplicate joint approval responsibility between Aarav and Pooja.
-   - Prune a redundant intermediate task (`task-7`).
-   - Wire the prerequisite edge between task-5 and task-6.
-
-### 4.3 Multi-Run Stability Benchmark Findings
-We conducted a 5-run empirical consistency test on the primary model at `temperature=0.1` (recorded in `logs/stability_5runs.json`):
-- **Core Backbone Invariance:** All 5 core committed tasks were extracted in 100% of runs with correct owners and relative dates resolved.
-- **Chatter Intrusion:** Zero conversational filler ("vendor seemed nice over tea", "chai was good") leaked into tasks across any run.
-- **Task Count Wobble (6 to 7 tasks):** Output task counts fluctuated between 6 and 7 across runs. The variance stemmed from two borderline conversational remarks:
-  - *"Shipping corrugated boxes order karva padshe, someone look into bulk carton rates"* — intermittently extracted as an unowned task needing confirmation vs. filtered into `ignored_remarks`.
-  - Vendor sample handover — intermittently extracted as a discrete subtask vs. merged into sample production.
-- **Product Implication:** LLM extraction produces stable cores but fuzzy boundaries on unowned brainstorms. A human approval step is not an optional safeguard; it is a structural necessity.
-
----
-
-## 5. Known Limitations & Prototype Boundaries
-
-| Feature Area | v1 Prototype Boundary | Production v2 Target |
+| Entity | Key Fields | Description & Relationships |
 | :--- | :--- | :--- |
-| **Dependency Edits in UI** | Reviewers can edit task title, owner, and due date, but cannot rewire graph dependencies in the terminal UI. | Interactive visual DAG editor allowing users to drag, rewire, and add dependencies prior to commitment. |
-| **Duration Estimation** | Task durations are manually defined via `estimated_duration_days` in the task schema. | LLM proposes duration ranges based on historical team velocity and scope complexity. |
-| **Launch Milestones** | The launch date (`2026-12-05`) is modeled as the final actionable leaf task. | Distinct `Milestone` entity decoupled from tasks, with independent buffer tracking. |
-| **Slip Detection Trigger** | Slips are simulated manually via CLI arguments (`--slip-days 2`). | Asynchronous webhook listener from Notion + 15-minute background polling cron to catch date slips automatically. |
-| **Unowned Action Items** | Prompt rules filter unowned brainstorms to `ignored_remarks`, but occasionally flag them as `needs_confirmation: true`. | Dedicated Slack triage queue where team leads can claim or discard orphaned ideas asynchronously. |
+| **Goals** | `id`, `name`, `target_date`, `weight` (1–3), `status` | High-level company milestones set by founders. Status rolls up from child tasks. |
+| **Tasks** | `id`, `title`, `owner`, `due_date`, `goal_id`, `depends_on`, `estimated_duration_days`, `status`, `confidence`, `needs_confirmation`, `source_quote` | Committed deliverables in Notion. `owner` maps to Team; `goal_id` maps to Goal; `depends_on` lists prerequisite task IDs; `status` is `safe`, `at_risk`, or `broken`. |
+| **Meetings** | `id`, `date`, `raw_notes`, `status` | Source meeting documents. Status: `ingested`, `pending_review`, `committed`. |
+| **Run Log** | `run_id`, `timestamp`, `meeting_id`, `model`, `prompt_tokens`, `completion_tokens`, `cost_usd`, `outcome`, `human_decisions` | Audit record of LLM prompts, token telemetry, extraction outcomes, and reviewer edits/rejections. |
 
----
+### 4. Buy vs. Build
 
-## 6. Monthly Cost & Unit Economics Projection
+- **Buy (Notion):** Team workspace and canonical task database; no need to build a bespoke project management UI.
+- **Buy (Slack):** Communication interface for interactive review cards and mobile/desktop alert delivery.
+- **Buy (LLM API):** Groq / OpenAI / Anthropic for inference; model choice is abstracted into `config/models.json` so switching providers is a config change.
+- **Buy (Cloud Hosting):** Render / Railway / AWS Lambda for running the webhook listener and cron worker ($5–$10/mo).
+- **Build (Multilingual Extraction & Validation):** Custom prompt and Pydantic business validator to resolve informal Indian startup speech (Hindi/Gujarati/English), relative dates, and speaker-assignee rules.
+- **Build (Slip Cascade Engine):** In-memory DAG that separates task duration from schedule slack to propagate delays downstream; off-the-shelf tools (Notion, Asana) treat tasks as flat records and cannot compute transitive buffer erosion.
 
-Using empirical token telemetry captured during live runs in `logs/run_log.json`:
+### 5. Production Runbook (3 Common Failures & Fixes)
 
-### 6.1 Baseline Per-Meeting Cost (Primary: `gpt-oss-20b`)
-- **Input Tokens:** ~2,627 tokens × $0.05 / 1M tokens = $0.000131
-- **Output Tokens:** ~1,238 tokens × $0.15 / 1M tokens = $0.000186
-- **Total Cost Per Meeting:** **$0.000317 USD (~$0.00032)**
+1. **Notion API Error (Rate limit, expired token, or schema mismatch):**
+   - *Fix:* Worker buffers failed mutations in a dead-letter queue with exponential backoff (1m, 5m, 15m). If still failing after 3 attempts, it alerts `#ops-alerts` in Slack with payload links so commitments are never dropped.
+2. **Model Returns Bad Output (Invalid schema, circular dependency, unverified owner):**
+   - *Fix:* Schema validator catches the violation, feeds exact error text back to the model for 1x self-correction, and escalates to a 120B fallback model if needed. If all retries fail, it posts a plain-English Slack triage card: *"Could not parse meeting note due to cyclic dependency; click to review raw text."*
+3. **Slack Alert Delivery Failure (Invalid user handle, webhook rate limit, or DM closed):**
+   - *Fix:* Alerts are stored with delivery status `pending` and retried with jitter. If direct DM fails, alert falls back to posting in the public `#project-alerts` channel tagging `@project-lead`.
 
-### 6.2 Monthly Organization Projection
-Assumptions for a growing 20-person startup:
-- **Frequency:** 2 team meetings/week per team × 5 teams = 10 meetings/week = **40 meetings/month**.
-- **Retry & Escalation Allowance:** Assume 15% of meetings require a self-correction retry, and 5% escalate to the 120B fallback model ($0.15 / $0.60 per 1M tokens).
+### 6. Estimated Monthly Operating Cost
 
-| Component | Volume / Month | Effective Cost |
+*Assumptions: 20-person startup, 10 meetings/week = 40 meetings/month, 15% retry rate assumption, 5% fallback escalation assumption.*
+
+| Component | Basis | Monthly Cost |
 | :--- | :--- | :--- |
-| Primary Ingestion (`gpt-oss-20b`) | 40 runs | $0.0128 |
-| Self-Correction Retries (`gpt-oss-20b`) | 6 runs | $0.0019 |
-| Fallback Escalations (`gpt-oss-120b`) | 2 runs | $0.0028 |
-| Storage & Telemetry Logging | Local / S3 | Negligible (< $0.01) |
-| **Total Estimated Monthly AI Cost** | **48 invocations** | **~$0.018 USD (< $0.05 / month)** |
-
-*Conclusion:* The marginal LLM inference cost of this system is virtually zero, making the human review workflow the primary operational bottleneck to optimize.
+| **LLM Inference (`gpt-oss-20b`)** | 40 runs @ ~$0.00032/run + 15% retry allowance | ~$0.015 |
+| **Fallback Escalations (`gpt-oss-120b`)** | 2 runs/month (5% assumption) @ ~$0.0014/run | ~$0.003 |
+| **Cloud Hosting (Render / Railway / Lambda)** | Always-on webhook listener + 10-min cron worker | $5.00 – $10.00 |
+| **Notion & Slack Workspaces** | Existing team subscriptions | $0.00 |
+| **Total Monthly Operating Cost** | **Complete production infrastructure** | **~$5.02 – $10.02 / month** |
 
 ---
 
-## 7. Production Roadmap (v2 & Beyond)
+## Appendix: Empirical Findings & Prototype Verification
 
-1. **Two-Way Notion & Linear Synchronization:** Direct REST API integration with Notion databases and Linear boards, capturing bi-directional webhook updates when due dates shift.
-2. **Interactive Slack Bolt Integration:** Deliver Slack alerts as interactive Slack Block Kit cards with native buttons: `[Accept Slip]`, `[Compress Buffer]`, and `[Reschedule Milestone]`.
-3. **Automated Duration Inference:** Train a fine-tuned LoRA or leverage historical Jira/Linear completion metrics to predict realistic task durations and confidence intervals automatically.
-4. **Calendar & Holiday Awareness:** Integrate Google Calendar API to automatically account for regional holidays (e.g., Diwali week in Ahmedabad), weekends, and PTO schedules during cascade propagation.
-5. **Multi-Meeting Graph Merging:** Automatically link dependencies across different weekly syncs and workstreams into a unified organizational master graph.
+### A1. Prototype Architecture ("What the Demo Covers")
 
+The prototype built for this submission validates the risky core logic (LLM decoding, validation feedback, DAG math) locally before connecting production APIs:
+
+```mermaid
+flowchart TD
+    A["Raw Multilingual Meeting Note<br/>(data/meeting_notes_2026-11-16.md)"] --> B["Primary Extraction<br/>(Groq: openai/gpt-oss-20b)"]
+    B --> C{"Business Rules & Schema<br/>(src/validate.py)"}
+    C -- "Cycle / Invalid Owner" --> D["Self-Correction Loop<br/>(Retries with Error Feedback)"]
+    D --> C
+    C -- "Valid Schema" --> E["Staging File<br/>(data/extracted_tasks.json)"]
+    E --> F["Terminal Review UI<br/>(src/approve.py)"]
+    F --> G["Curated Tasks<br/>(data/approved_tasks.json)"]
+    G --> H["DAG Slip Engine<br/>(src/graph.py)"]
+    I["Simulated Slip Input<br/>(src/test_scenarios.py)"] --> H
+    H --> J["Console Slack Alerts & Logs<br/>(logs/simulation_scenarios.json)"]
+```
+
+### A2. Model Routing & 20B Reasoning Findings
+During prototyping on `openai/gpt-oss-20b`, the model initially failed with empty completions and HTTP 400 errors:
+- **Root Cause:** As an open reasoning model, default parameters allowed it to spend **2,046 tokens** on internal chain-of-thought, hitting Groq's 2,048 completion limit (`finish_reason: length`) before emitting JSON.
+- **Empirical Fix:** Setting `reasoning_effort="low"` reduced reasoning burn to **578 tokens**. Combined with expanding `max_completion_tokens=4096`, the model worked on my test note reliably on attempt 1.
+- **Provider Agnostic:** The model ID sits in `config/models.json`; switching to OpenAI or Anthropic requires only a config update without touching application code.
+
+### A3. What the Demo Does and Doesn't Prove
+
+- **What it Demonstrates:**
+  1. *Safety Net Wiring:* The `--simulate-break` test demonstrates that injected cyclic dependencies and unknown owners are caught by business rules, fed back into the context, and corrected on attempt 2.
+  2. *Cascade Math:* Separating task duration from schedule slack correctly distinguishes downstream status into 🔴 **BROKEN**, 🟡 **AT_RISK**, and 🟢 **SAFE**.
+  3. *Alert Timing:* Correctly calculates IST business hours (Mon–Sat, 9am–7pm IST) and queues off-hours alerts until 9:00 AM.
+  4. *Date Normalization:* In 5 out of 5 runs on our test note, relative temporal anchors ("Friday", "Wednesday") mapped accurately to ISO dates (`2026-11-20`).
+
+- **What it Does NOT Prove:**
+  1. *Real Messy Audio:* Tested on a synthetic benchmark note, not noisy speech-to-text transcripts with disfluencies or ambient chatter.
+  2. *Automated Pipeline Output of `approved_tasks.json`:* **Honest Disclosure:** The `approved_tasks.json` dataset used for the graph engine was **hand-curated** by human review. A human was required to specify the committed date for task-4 (`2026-12-05`), resolve a duplicate joint review, prune redundant task-7, and link task-6 to task-5.
+  3. *Zero-Touch Extraction:* Human approval is an intentional design rule because boundary detection on informal conversational proposals naturally varies.
+
+### A4. Multi-Run Consistency Benchmark (5 Runs)
+Across 5 benchmark runs of the primary model at `temperature=0.1` ([stability_5runs.json](file:///Users/srijantelang27/Desktop/Personal/product/logs/stability_5runs.json)):
+- **Invariant Core:** All 5 core committed tasks were extracted in 5 out of 5 runs with zero chatter intrusion.
+- **Task Count Wobble (6 to 7 tasks):** Output counts wobbled between 6 and 7 because borderline conversational remarks (e.g. unassigned carton inquiries) were intermittently flagged as unassigned tasks vs. filtered remarks.
+- **Known Gap on Unowned Items:** v1 sometimes drops unowned proposals or routes them to `ignored_remarks`; v2 addresses this by surfacing ignored remarks directly in the review screen.
+
+### A5. Prototype Boundaries & Production Targets
+
+| Area | Prototype Boundary | Production Target |
+| :--- | :--- | :--- |
+| **Review UI** | Interactive terminal CLI (`src/approve.py`). | Slack Block Kit message with interactive buttons. |
+| **Duration Input** | Manually specified via `estimated_duration_days`. | Historical completion velocity calculated from Notion. |
+| **Unowned Tasks** | Filtered by prompt; occasionally dropped. | Review screen displays ignored remarks for optional recovery. |
+| **Slip Trigger** | CLI argument simulation. | Notion webhook + 10-15 min background polling worker. |
+| **Priority Ranking** | Deferred to v2. | Eisenhower matrix combining goal weight with critical path urgency. |
+
+### A6. Production Roadmap (v2 Native Stack)
+1. **Notion Automations & Webhooks:** Native triggers on database page edits to detect due-date slips automatically.
+2. **Slack Block Kit Action Cards:** Interactive Slack messages allowing one-click task approvals, date edits, or dependency rewires.
+3. **Notion AI Meeting Notes as Ingestion Source:** Directly ingest Notion's native AI-generated meeting summaries as high-quality, pre-transcribed inputs.
+4. **Calendar & Regional Holiday Awareness:** Account for regional office closures (e.g., Diwali week in Ahmedabad) when computing projected finishes and buffer erosion.
