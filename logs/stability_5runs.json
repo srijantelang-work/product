@@ -1,8 +1,8 @@
 [
   {
     "run": 1,
-    "task_count": 7,
-    "ignored_count": 5,
+    "task_count": 6,
+    "ignored_count": 6,
     "tasks": [
       {
         "id": "task-1",
@@ -14,7 +14,7 @@
         "confidence": "high",
         "needs_confirmation": false,
         "reason": null,
-        "source_quote": "Pooja, finalize and export the high\u2011res print\u2011ready artwork files by this Wednesday (18 Nov 2026)."
+        "source_quote": "Pooja, finalize and export the high-res print-ready artwork files by this Wednesday (18 Nov 2026)."
       },
       {
         "id": "task-2",
@@ -22,10 +22,12 @@
         "owner": "Karan Mehta",
         "due_date": null,
         "goal": null,
-        "depends_on": [],
+        "depends_on": [
+          "task-1"
+        ],
         "confidence": "medium",
         "needs_confirmation": true,
-        "reason": "Owner assigned but due date not specified",
+        "reason": "Owner confirmed, but due date not specified",
         "source_quote": "once Pooja gives the final design files on Wednesday, I will send them to the print vendor in Ahmedabad to produce the physical sample box."
       },
       {
@@ -34,7 +36,9 @@
         "owner": "Aarav Sharma",
         "due_date": "2026-11-23",
         "goal": "goal-1",
-        "depends_on": [],
+        "depends_on": [
+          "task-2"
+        ],
         "confidence": "high",
         "needs_confirmation": false,
         "reason": null,
@@ -45,112 +49,14 @@
         "title": "Trigger bulk packaging run and warehouse dispatch",
         "owner": "Karan Mehta",
         "due_date": null,
-        "goal": null,
+        "goal": "goal-1",
         "depends_on": [
           "task-3"
         ],
         "confidence": "medium",
         "needs_confirmation": true,
-        "reason": "Owner assigned but due date not specified",
-        "source_quote": "As soon as packaging approval comes in on 23 Nov, I will trigger the bulk packaging run and warehouse dispatch."
-      },
-      {
-        "id": "task-5",
-        "title": "Lock influencer roster for pre\u2011buzz campaign",
-        "owner": "Ananya Joshi",
-        "due_date": "2026-11-20",
-        "goal": "goal-2",
-        "depends_on": [],
-        "confidence": "high",
-        "needs_confirmation": false,
-        "reason": null,
-        "source_quote": "I'll lock the influencer roster by Friday (20 Nov 2026)."
-      },
-      {
-        "id": "task-6",
-        "title": "Prepare five teaser motion reels for influencer pre\u2011buzz campaign",
-        "owner": "Pooja Patel",
-        "due_date": null,
-        "goal": "goal-2",
-        "depends_on": [],
-        "confidence": "medium",
-        "needs_confirmation": true,
-        "reason": "Owner assigned but due date not specified",
-        "source_quote": "Pooja, can you prepare 5 teaser motion reels?"
-      },
-      {
-        "id": "task-7",
-        "title": "Finalize campaign copy for influencer pre\u2011buzz campaign",
-        "owner": null,
-        "due_date": null,
-        "goal": "goal-2",
-        "depends_on": [],
-        "confidence": "low",
-        "needs_confirmation": true,
-        "reason": "No explicit owner or due date; request made by Pooja",
-        "source_quote": "Someone should write the campaign copy next week."
-      }
-    ],
-    "is_valid": true
-  },
-  {
-    "run": 2,
-    "task_count": 6,
-    "ignored_count": 4,
-    "tasks": [
-      {
-        "id": "task-1",
-        "title": "Export high\u2011resolution print\u2011ready artwork files",
-        "owner": "Pooja Patel",
-        "due_date": "2026-11-18",
-        "goal": "goal-1",
-        "depends_on": [],
-        "confidence": "high",
-        "needs_confirmation": false,
-        "reason": null,
-        "source_quote": "Pooja, finalize and export the high\u2011res print\u2011ready artwork files by this Wednesday (18 Nov 2026)."
-      },
-      {
-        "id": "task-2",
-        "title": "Send final design files to print vendor in Ahmedabad",
-        "owner": "Karan Mehta",
-        "due_date": "2026-11-18",
-        "goal": "goal-1",
-        "depends_on": [
-          "task-1"
-        ],
-        "confidence": "high",
-        "needs_confirmation": false,
-        "reason": null,
-        "source_quote": "once Pooja gives the final design files on Wednesday, I will send them to the print vendor in Ahmedabad to produce the physical sample box."
-      },
-      {
-        "id": "task-3",
-        "title": "Receive vendor sample and inspect packaging",
-        "owner": "Aarav Sharma",
-        "due_date": "2026-11-23",
-        "goal": "goal-1",
-        "depends_on": [
-          "task-2"
-        ],
-        "confidence": "high",
-        "needs_confirmation": false,
-        "reason": null,
-        "source_quote": "Once the sample arrives on Friday, Aarav and Pooja must inspect the sample box and give final packaging approval by Monday, 23 Nov 2026."
-      },
-      {
-        "id": "task-4",
-        "title": "Trigger bulk packaging run and warehouse dispatch",
-        "owner": "Karan Mehta",
-        "due_date": "2026-11-23",
-        "goal": "goal-1",
-        "depends_on": [
-          "task-3"
-        ],
-        "confidence": "high",
-        "needs_confirmation": false,
-        "reason": null,
-        "source_quote": "As soon as packaging approval comes in on 23 Nov, I will trigger the bulk packaging run and warehouse dispatch so that our final product launch happens smoothly on 5 Dec 2026."
+        "reason": "Due date not specified",
+        "source_quote": "As soon as packaging approval comes in on 23 Nov, I will trigger the bulk packaging run and warehouse dispatch"
       },
       {
         "id": "task-5",
@@ -168,22 +74,20 @@
         "id": "task-6",
         "title": "Prepare 5 teaser motion reels for influencer pre\u2011buzz campaign",
         "owner": "Pooja Patel",
-        "due_date": "2026-11-28",
+        "due_date": null,
         "goal": "goal-2",
-        "depends_on": [
-          "task-5"
-        ],
+        "depends_on": [],
         "confidence": "medium",
         "needs_confirmation": true,
-        "reason": "Owner confirmed but due date inferred from campaign start date; copy not yet finalized.",
+        "reason": "Due date not specified",
         "source_quote": "Pooja, can you prepare 5 teaser motion reels?"
       }
     ],
     "is_valid": true
   },
   {
-    "run": 3,
-    "task_count": 7,
+    "run": 2,
+    "task_count": 8,
     "ignored_count": 5,
     "tasks": [
       {
@@ -215,7 +119,7 @@
       {
         "id": "task-3",
         "title": "Vendor produce physical sample box",
-        "owner": null,
+        "owner": "Karan Mehta",
         "due_date": "2026-11-20",
         "goal": "goal-1",
         "depends_on": [
@@ -244,15 +148,15 @@
         "id": "task-5",
         "title": "Trigger bulk packaging run and warehouse dispatch",
         "owner": "Karan Mehta",
-        "due_date": null,
+        "due_date": "2026-11-23",
         "goal": "goal-1",
         "depends_on": [
           "task-4"
         ],
         "confidence": "high",
-        "needs_confirmation": true,
-        "reason": "No explicit deadline set for bulk run",
-        "source_quote": "As soon as packaging approval comes in on 23 Nov, I will trigger the bulk packaging run and warehouse dispatch so that our final product launch happens smoothly on 5 Dec 2026."
+        "needs_confirmation": false,
+        "reason": null,
+        "source_quote": "As soon as packaging approval comes in on 23 Nov, I will trigger the bulk packaging run and warehouse dispatch."
       },
       {
         "id": "task-6",
@@ -270,16 +174,116 @@
         "id": "task-7",
         "title": "Prepare 5 teaser motion reels for influencer pre\u2011buzz campaign",
         "owner": "Pooja Patel",
-        "due_date": null,
+        "due_date": "2026-11-28",
+        "goal": "goal-2",
+        "depends_on": [],
+        "confidence": "medium",
+        "needs_confirmation": true,
+        "reason": "Owner confirmed but due date and copy requirement are unclear; requires confirmation of final ad copy and exact deadline.",
+        "source_quote": "Pooja, can you prepare 5 teaser motion reels?"
+      },
+      {
+        "id": "task-8",
+        "title": "Start influencer pre\u2011buzz campaign",
+        "owner": "Ananya Joshi",
+        "due_date": "2026-11-28",
+        "goal": "goal-2",
+        "depends_on": [
+          "task-7"
+        ],
+        "confidence": "high",
+        "needs_confirmation": false,
+        "reason": null,
+        "source_quote": "influencer pre\u2011buzz campaign start karvu chhe by 28 Nov 2026."
+      }
+    ],
+    "is_valid": true
+  },
+  {
+    "run": 3,
+    "task_count": 6,
+    "ignored_count": 5,
+    "tasks": [
+      {
+        "id": "task-1",
+        "title": "Finalize and export high\u2011resolution print\u2011ready artwork files",
+        "owner": "Pooja Patel",
+        "due_date": "2026-11-18",
+        "goal": "goal-1",
+        "depends_on": [],
+        "confidence": "high",
+        "needs_confirmation": false,
+        "reason": null,
+        "source_quote": "Pooja, finalize and export the high\u2011res print\u2011ready artwork files by this Wednesday (18 Nov 2026)."
+      },
+      {
+        "id": "task-2",
+        "title": "Send final design files to print vendor in Ahmedabad",
+        "owner": "Karan Mehta",
+        "due_date": "2026-11-18",
+        "goal": "goal-1",
+        "depends_on": [
+          "task-1"
+        ],
+        "confidence": "high",
+        "needs_confirmation": false,
+        "reason": null,
+        "source_quote": "once Pooja gives the final design files on Wednesday, I will send them to the print vendor in Ahmedabad to produce the physical sample box."
+      },
+      {
+        "id": "task-3",
+        "title": "Inspect sample box and give final packaging approval",
+        "owner": "Aarav Sharma",
+        "due_date": "2026-11-23",
+        "goal": "goal-1",
+        "depends_on": [
+          "task-2"
+        ],
+        "confidence": "high",
+        "needs_confirmation": false,
+        "reason": null,
+        "source_quote": "Aarav and Pooja must inspect the sample box and give final packaging approval by Monday, 23 Nov 2026."
+      },
+      {
+        "id": "task-4",
+        "title": "Trigger bulk packaging run and warehouse dispatch",
+        "owner": "Karan Mehta",
+        "due_date": "2026-11-23",
+        "goal": "goal-1",
+        "depends_on": [
+          "task-3"
+        ],
+        "confidence": "high",
+        "needs_confirmation": false,
+        "reason": null,
+        "source_quote": "As soon as packaging approval comes in on 23 Nov, I will trigger the bulk packaging run and warehouse dispatch so that our final product launch happens smoothly on 5 Dec 2026."
+      },
+      {
+        "id": "task-5",
+        "title": "Lock influencer roster for pre\u2011buzz campaign",
+        "owner": "Ananya Joshi",
+        "due_date": "2026-11-20",
         "goal": "goal-2",
         "depends_on": [],
         "confidence": "high",
+        "needs_confirmation": false,
+        "reason": null,
+        "source_quote": "I'll lock the influencer roster by Friday (20 Nov 2026)."
+      },
+      {
+        "id": "task-6",
+        "title": "Prepare 5 teaser motion reels for influencer pre\u2011buzz campaign",
+        "owner": "Pooja Patel",
+        "due_date": null,
+        "goal": "goal-2",
+        "depends_on": [],
+        "confidence": "medium",
         "needs_confirmation": true,
-        "reason": "No deadline specified for reel preparation",
+        "reason": "Copy for the reels has not been finalized; task owner confirmed but due date not specified.",
         "source_quote": "Pooja, can you prepare 5 teaser motion reels?"
       }
     ],
-    "is_valid": false
+    "is_valid": true
   },
   {
     "run": 4,
@@ -356,12 +360,12 @@
         "id": "task-6",
         "title": "Prepare 5 teaser motion reels for influencer pre\u2011buzz campaign",
         "owner": "Pooja Patel",
-        "due_date": null,
+        "due_date": "2026-11-28",
         "goal": "goal-2",
         "depends_on": [],
-        "confidence": "medium",
-        "needs_confirmation": true,
-        "reason": "Owner confirmed but due date not specified; task requires finalized ad copy before production.",
+        "confidence": "high",
+        "needs_confirmation": false,
+        "reason": null,
         "source_quote": "Pooja, can you prepare 5 teaser motion reels?"
       }
     ],
@@ -369,8 +373,8 @@
   },
   {
     "run": 5,
-    "task_count": 7,
-    "ignored_count": 6,
+    "task_count": 5,
+    "ignored_count": 4,
     "tasks": [
       {
         "id": "task-1",
@@ -382,20 +386,20 @@
         "confidence": "high",
         "needs_confirmation": false,
         "reason": null,
-        "source_quote": "Pooja, finalize and export the high-res print-ready artwork files by this Wednesday (18 Nov 2026)."
+        "source_quote": "Pooja, finalize and export the high\u2011res print\u2011ready artwork files by this Wednesday (18 Nov 2026)."
       },
       {
         "id": "task-2",
         "title": "Send final design files to print vendor in Ahmedabad",
         "owner": "Karan Mehta",
-        "due_date": null,
+        "due_date": "2026-11-18",
         "goal": "goal-1",
         "depends_on": [
           "task-1"
         ],
-        "confidence": "medium",
-        "needs_confirmation": true,
-        "reason": "Owner confirmed, but due date not specified",
+        "confidence": "high",
+        "needs_confirmation": false,
+        "reason": null,
         "source_quote": "once Pooja gives the final design files on Wednesday, I will send them to the print vendor in Ahmedabad to produce the physical sample box."
       },
       {
@@ -414,17 +418,17 @@
       },
       {
         "id": "task-4",
-        "title": "Trigger bulk packaging run and warehouse dispatch after approval",
+        "title": "Trigger bulk packaging run and warehouse dispatch",
         "owner": "Karan Mehta",
-        "due_date": null,
+        "due_date": "2026-11-23",
         "goal": "goal-1",
         "depends_on": [
           "task-3"
         ],
-        "confidence": "medium",
-        "needs_confirmation": true,
-        "reason": "Due date not specified",
-        "source_quote": "I will trigger the bulk packaging run and warehouse dispatch so that our final product launch happens smoothly on 5 Dec 2026."
+        "confidence": "high",
+        "needs_confirmation": false,
+        "reason": null,
+        "source_quote": "As soon as packaging approval comes in on 23 Nov, I will trigger the bulk packaging run and warehouse dispatch."
       },
       {
         "id": "task-5",
@@ -437,32 +441,6 @@
         "needs_confirmation": false,
         "reason": null,
         "source_quote": "I'll lock the influencer roster by Friday (20 Nov 2026)."
-      },
-      {
-        "id": "task-6",
-        "title": "Prepare 5 teaser motion reels for influencer pre\u2011buzz campaign",
-        "owner": "Pooja Patel",
-        "due_date": null,
-        "goal": "goal-2",
-        "depends_on": [],
-        "confidence": "medium",
-        "needs_confirmation": true,
-        "reason": "Due date not specified",
-        "source_quote": "Pooja, can you prepare 5 teaser motion reels?"
-      },
-      {
-        "id": "task-7",
-        "title": "Trigger bulk production order after final packaging approval",
-        "owner": "Karan Mehta",
-        "due_date": null,
-        "goal": "goal-1",
-        "depends_on": [
-          "task-3"
-        ],
-        "confidence": "medium",
-        "needs_confirmation": true,
-        "reason": "Due date not specified",
-        "source_quote": "pachhi j bulk production order trigger karvano chhe."
       }
     ],
     "is_valid": true

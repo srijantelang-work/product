@@ -452,5 +452,339 @@
       "total": 3865
     },
     "estimated_cost_usd": 0.000321
+  },
+  {
+    "timestamp": "2026-11-19T09:22:44.056466Z",
+    "prompt_version": "1.1.0",
+    "input_hash": "14ecfaa415a5d1ee",
+    "primary_model": "openai/gpt-oss-20b",
+    "fallback_model": "openai/gpt-oss-120b",
+    "attempts": [
+      {
+        "stage": "primary_initial",
+        "model": "openai/gpt-oss-20b",
+        "telemetry": {
+          "duration_sec": 3.257,
+          "finish_reason": "stop",
+          "prompt_tokens": 2627,
+          "completion_tokens": 2183,
+          "total_tokens": 4810,
+          "cost_usd": 0.000415
+        },
+        "status": "success",
+        "validation_errors": []
+      }
+    ],
+    "outcome": "success",
+    "human_decision": {
+      "total_reviewed": 6,
+      "total_approved": 5,
+      "total_rejected": 1,
+      "decisions": [
+        {
+          "task_id": "task-1",
+          "action": "approved",
+          "modifications": null
+        },
+        {
+          "task_id": "task-2",
+          "action": "edited",
+          "modifications": {
+            "owner": {
+              "from": "Karan Mehta",
+              "to": "Vikram Desai"
+            }
+          }
+        },
+        {
+          "task_id": "task-3",
+          "action": "approved",
+          "modifications": null
+        },
+        {
+          "task_id": "task-4",
+          "action": "edited",
+          "modifications": {
+            "due_date": {
+              "from": "",
+              "to": "2026-12-05"
+            }
+          }
+        },
+        {
+          "task_id": "task-5",
+          "action": "approved",
+          "modifications": null
+        },
+        {
+          "task_id": "task-6",
+          "action": "rejected",
+          "reason": "Postponed until after Diwali campaign launch"
+        }
+      ]
+    },
+    "final_output": {
+      "meeting_date": "2026-11-16",
+      "tasks": [
+        {
+          "id": "task-1",
+          "title": "Finalize and export high\u2011resolution print\u2011ready artwork files",
+          "owner": "Pooja Patel",
+          "due_date": "2026-11-18",
+          "goal": "goal-1",
+          "depends_on": [],
+          "confidence": "high",
+          "needs_confirmation": false,
+          "reason": null,
+          "source_quote": "Pooja, finalize and export the high-res print-ready artwork files by this Wednesday (18 Nov 2026)."
+        },
+        {
+          "id": "task-2",
+          "title": "Send final design files to print vendor in Ahmedabad for sample production",
+          "owner": "Karan Mehta",
+          "due_date": "2026-11-20",
+          "goal": "goal-1",
+          "depends_on": [],
+          "confidence": "high",
+          "needs_confirmation": false,
+          "reason": null,
+          "source_quote": "once Pooja gives the final design files on Wednesday, I will send them to the print vendor in Ahmedabad to produce the physical sample box. Vendor needs 3 days, toh vendor sample Friday tak ready ho jayega (20 Nov 2026)."
+        },
+        {
+          "id": "task-3",
+          "title": "Inspect sample box and give final packaging approval",
+          "owner": "Aarav Sharma",
+          "due_date": "2026-11-23",
+          "goal": "goal-1",
+          "depends_on": [],
+          "confidence": "high",
+          "needs_confirmation": false,
+          "reason": null,
+          "source_quote": "Aarav and Pooja must inspect the sample box and give final packaging approval by Monday, 23 Nov 2026."
+        },
+        {
+          "id": "task-4",
+          "title": "Trigger bulk packaging run and warehouse dispatch",
+          "owner": "Karan Mehta",
+          "due_date": null,
+          "goal": "goal-1",
+          "depends_on": [
+            "task-3"
+          ],
+          "confidence": "medium",
+          "needs_confirmation": true,
+          "reason": "Due date not explicitly stated; depends on approval date.",
+          "source_quote": "Once the sample arrives on Friday, Aarav and Pooja must inspect the sample box and give final packaging approval by Monday, 23 Nov 2026. Approval vageire clear thayi jaay, pachhi j bulk production order trigger karvano chhe."
+        },
+        {
+          "id": "task-5",
+          "title": "Lock influencer roster for pre\u2011buzz campaign",
+          "owner": "Ananya Joshi",
+          "due_date": "2026-11-20",
+          "goal": "goal-2",
+          "depends_on": [],
+          "confidence": "high",
+          "needs_confirmation": false,
+          "reason": null,
+          "source_quote": "I'll lock the influencer roster by Friday (20 Nov 2026)."
+        },
+        {
+          "id": "task-6",
+          "title": "Prepare 5 teaser motion reels for influencer pre\u2011buzz campaign",
+          "owner": "Pooja Patel",
+          "due_date": null,
+          "goal": "goal-2",
+          "depends_on": [],
+          "confidence": "medium",
+          "needs_confirmation": true,
+          "reason": "Due date not specified.",
+          "source_quote": "Pooja, can you prepare 5 teaser motion reels?"
+        }
+      ],
+      "ignored_remarks": [
+        {
+          "quote": "Vendor seemed really nice when we met them over tea last week.",
+          "reason": "Subjective opinion, not a commitment."
+        },
+        {
+          "quote": "Also we need to rethink our unboxing card insertion, maybe add a QR code for discount.",
+          "reason": "Brainstorming, no clear commitment."
+        },
+        {
+          "quote": "Someone should write the campaign copy next week.",
+          "reason": "Speculative idea, no assignment."
+        },
+        {
+          "quote": "Shipping corrugated boxes order karva padshe, someone look into bulk carton rates.",
+          "reason": "Uncommitted request."
+        },
+        {
+          "quote": "Meeting ended with Vikram reminding everyone to keep deadlines tight.",
+          "reason": "General reminder, no actionable task."
+        },
+        {
+          "quote": "Design finalization toh ho gaya.",
+          "reason": "Status update, not a task."
+        },
+        {
+          "quote": "Toh guys, Diwali Artisan Chai Gift Box launch is fixed for 5th December. We cannot afford any delay here, samjhya? Let's freeze the sequence right away.",
+          "reason": "General statement, no specific action."
+        },
+        {
+          "quote": "Pooja showed the revised tin can packaging artworks. Everyone agreed on the terracotta gold foil colorway.",
+          "reason": "Consensus statement, no task."
+        },
+        {
+          "quote": "Ananya pitched the digital marketing campaign.",
+          "reason": "Presentation, no commitment."
+        }
+      ]
+    },
+    "slack_failure_message": null,
+    "final_model": "openai/gpt-oss-20b",
+    "total_tokens": {
+      "prompt_tokens": 2627,
+      "completion_tokens": 2183,
+      "total": 4810
+    },
+    "estimated_cost_usd": 0.000415
+  },
+  {
+    "timestamp": "2026-11-19T09:23:55.145840Z",
+    "prompt_version": "1.1.0",
+    "input_hash": "14ecfaa415a5d1ee",
+    "primary_model": "openai/gpt-oss-20b",
+    "fallback_model": "openai/gpt-oss-120b",
+    "attempts": [
+      {
+        "stage": "primary_initial",
+        "model": "openai/gpt-oss-20b",
+        "telemetry": {
+          "prompt_tokens": 100,
+          "completion_tokens": 100,
+          "total_tokens": 200,
+          "cost_usd": 1e-05
+        },
+        "status": "failed_business_rules",
+        "validation_errors": [
+          "[no_dependency_cycles] Circular dependency detected in graph: task-B -> task-A -> task-B",
+          "[owner_in_team] Task task-A has owner 'Nonexistent Person' not in team roster ['Ananya Joshi', 'Pooja Patel', 'Karan Mehta', 'Vikram Desai', 'Aarav Sharma'].",
+          "[due_date_not_past] Task task-A has due date 2026-11-10 before meeting date 2026-11-16."
+        ]
+      },
+      {
+        "stage": "primary_feedback_retry",
+        "model": "openai/gpt-oss-20b",
+        "telemetry": {
+          "duration_sec": 1.775,
+          "finish_reason": "stop",
+          "prompt_tokens": 2968,
+          "completion_tokens": 808,
+          "total_tokens": 3776,
+          "cost_usd": 0.000303
+        },
+        "status": "success",
+        "validation_errors": []
+      }
+    ],
+    "outcome": "retried",
+    "human_decision": null,
+    "final_output": {
+      "meeting_date": "2026-11-16",
+      "tasks": [
+        {
+          "id": "task-1",
+          "title": "Finalize and export high\u2011resolution print\u2011ready artwork files",
+          "owner": "Pooja Patel",
+          "due_date": "2026-11-18",
+          "goal": "goal-1",
+          "depends_on": [],
+          "confidence": "high",
+          "needs_confirmation": false,
+          "reason": null,
+          "source_quote": "Pooja, finalize and export the high\u2011res print\u2011ready artwork files by this Wednesday (18 Nov 2026)."
+        },
+        {
+          "id": "task-2",
+          "title": "Send final design files to print vendor in Ahmedabad",
+          "owner": "Karan Mehta",
+          "due_date": "2026-11-20",
+          "goal": "goal-1",
+          "depends_on": [
+            "task-1"
+          ],
+          "confidence": "high",
+          "needs_confirmation": false,
+          "reason": null,
+          "source_quote": "once Pooja gives the final design files on Wednesday, I will send them to the print vendor in Ahmedabad to produce the physical sample box."
+        },
+        {
+          "id": "task-3",
+          "title": "Inspect sample box and give final packaging approval",
+          "owner": "Aarav Sharma",
+          "due_date": "2026-11-23",
+          "goal": "goal-1",
+          "depends_on": [
+            "task-2"
+          ],
+          "confidence": "high",
+          "needs_confirmation": false,
+          "reason": null,
+          "source_quote": "Aarav and Pooja must inspect the sample box and give final packaging approval by Monday, 23 Nov 2026."
+        },
+        {
+          "id": "task-4",
+          "title": "Trigger bulk packaging run and warehouse dispatch",
+          "owner": "Karan Mehta",
+          "due_date": "2026-11-23",
+          "goal": "goal-1",
+          "depends_on": [
+            "task-3"
+          ],
+          "confidence": "high",
+          "needs_confirmation": false,
+          "reason": null,
+          "source_quote": "As soon as packaging approval comes in on 23 Nov, I will trigger the bulk packaging run and warehouse dispatch."
+        },
+        {
+          "id": "task-5",
+          "title": "Lock influencer roster for pre\u2011buzz campaign",
+          "owner": "Ananya Joshi",
+          "due_date": "2026-11-20",
+          "goal": "goal-2",
+          "depends_on": [],
+          "confidence": "high",
+          "needs_confirmation": false,
+          "reason": null,
+          "source_quote": "I'll lock the influencer roster by Friday (20 Nov 2026)."
+        }
+      ],
+      "ignored_remarks": [
+        {
+          "quote": "The vendor seemed really nice when we met them over tea last week.",
+          "reason": "Opinion about vendor, not a task."
+        },
+        {
+          "quote": "Also we need to rethink our unboxing card insertion, maybe add a QR code for discount.",
+          "reason": "Exploratory idea, no commitment."
+        },
+        {
+          "quote": "Someone should write the campaign copy next week.",
+          "reason": "Uncommitted suggestion, no owner or due date."
+        },
+        {
+          "quote": "Shipping corrugated boxes order karva padshe, someone look into bulk carton rates.",
+          "reason": "Uncommitted suggestion, no owner or due date."
+        }
+      ]
+    },
+    "slack_failure_message": null,
+    "final_model": "openai/gpt-oss-20b",
+    "total_tokens": {
+      "prompt_tokens": 3068,
+      "completion_tokens": 908,
+      "total": 3976
+    },
+    "estimated_cost_usd": 0.000313
   }
 ]
